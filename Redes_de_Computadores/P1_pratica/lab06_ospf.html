@@ -1,0 +1,1214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 6 · OSPF</title>
+<style>
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --fg:#1d232b; --muted:#5b6470; --line:#d9d5ca;
+  --accent:#1f5fae; --ospf:#1b7a4c; --ospf-bg:rgba(27,122,76,.07); --ext:#7b3fa8;
+  --warn:#8a5200; --warn-bg:#fff3d6; --bad:#b3261e; --ok:#1b7a4c; --path:#e0661b;
+  --code-bg:#efede6; --code-fg:#1d232b; --chip:#e8e5dc;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#13161a; --surface:#1b1f25; --fg:#e5e8ec; --muted:#9aa3ae; --line:#2e343c;
+    --accent:#7ab0f2; --ospf:#55c993; --ospf-bg:rgba(85,201,147,.07); --ext:#c7a0f0;
+    --warn:#f2b54e; --warn-bg:#2a2316; --bad:#f2847c; --ok:#55c993; --path:#ff9d55;
+    --code-bg:#0f1216; --code-fg:#dfe3e8; --chip:#262b33; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13161a; --surface:#1b1f25; --fg:#e5e8ec; --muted:#9aa3ae; --line:#2e343c;
+  --accent:#7ab0f2; --ospf:#55c993; --ospf-bg:rgba(85,201,147,.07); --ext:#c7a0f0;
+  --warn:#f2b54e; --warn-bg:#2a2316; --bad:#f2847c; --ok:#55c993; --path:#ff9d55;
+  --code-bg:#0f1216; --code-fg:#dfe3e8; --chip:#262b33; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 64px}
+header.top{padding:36px 0 18px;border-bottom:1px solid var(--line);margin-bottom:8px}
+header.top .kicker{font:600 13px/1 var(--mono);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+header.top p{margin:0;color:var(--muted);max-width:70ch}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.chip{display:inline-block;background:var(--chip);color:var(--fg);border-radius:999px;padding:2px 10px;font-size:13px;white-space:nowrap}
+.chip.ospf{background:var(--ospf-bg);color:var(--ospf);border:1px solid var(--ospf)}
+.chip.pp{background:transparent;color:var(--ext);border:1px solid var(--ext)}
+.chip.wn{background:var(--warn-bg);color:var(--warn)}
+button{font:inherit;cursor:pointer}
+.theme-btn{margin-left:auto;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:14px}
+nav.toc{margin:18px 0 8px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+nav.toc b{display:block;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:28px}
+nav.toc li{break-inside:avoid;padding:1px 0}
+@media (max-width:640px){nav.toc ol{columns:1}}
+a{color:var(--accent)}
+section{padding-top:26px}
+h2{font-size:24px;line-height:1.25;margin:10px 0 10px;padding-top:10px;border-top:1px solid var(--line)}
+h2 .n{font:600 15px var(--mono);color:var(--muted);margin-right:8px}
+h3{font-size:18px;margin:24px 0 8px}
+p,li{max-width:76ch}
+code,kbd{font-family:var(--mono);font-size:.9em;background:var(--code-bg);color:var(--code-fg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{position:relative;font:13.5px/1.5 var(--mono);background:var(--code-bg);color:var(--code-fg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0 16px}
+pre code{background:none;padding:0;font-size:inherit}
+pre .cm{color:var(--muted)}
+pre .hl{color:var(--ospf);font-weight:600}
+pre .ex{color:var(--ext);font-weight:600}
+pre .st{color:var(--accent);font-weight:600}
+.copy{position:absolute;top:8px;right:8px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:6px;font-size:12px;padding:2px 8px}
+.copy:hover{color:var(--fg)}
+.tbl{overflow-x:auto;margin:10px 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--code-bg);font-weight:600}
+td code{white-space:nowrap}
+.note,.warn,.prop{border-radius:10px;padding:12px 14px;margin:14px 0;border:1px solid var(--line);background:var(--surface)}
+.note{border-left:4px solid var(--accent)}
+.warn{border-left:4px solid var(--warn);background:var(--warn-bg)}
+.prop{border-left:4px solid var(--ext)}
+.note>:first-child,.warn>:first-child,.prop>:first-child{margin-top:0}
+.note>:last-child,.warn>:last-child,.prop>:last-child{margin-bottom:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:0 16px}
+.grid2 pre{margin-top:4px}
+.cap{font-size:13px;color:var(--muted);margin:2px 0 0}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:10px 0}
+details[open]{padding-bottom:4px}
+summary{cursor:pointer;font-weight:600}
+dl.cmds{display:grid;grid-template-columns:minmax(0,max-content) 1fr;gap:6px 16px;margin:10px 0 16px}
+dl.cmds dt{font-family:var(--mono);font-size:14px}
+dl.cmds dd{margin:0}
+@media (max-width:640px){dl.cmds{grid-template-columns:1fr}dl.cmds dd{margin:0 0 8px 12px}}
+/* diagramas */
+figure{margin:12px 0 18px}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fig svg{display:block;width:100%;min-width:760px;height:auto}
+figcaption{font-size:13.5px;color:var(--muted);margin-top:6px}
+svg text{fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round}
+.lk{stroke:var(--muted);stroke-width:2.2}
+.lk.cross{stroke-dasharray:9 6}
+.dev circle,.dev rect{fill:var(--surface);stroke:var(--accent);stroke-width:2.4}
+.dev.pc rect{stroke:var(--muted)}
+.dev.off circle,.dev.off rect{stroke:var(--muted);stroke-dasharray:4 3}
+.dev .ico{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round}
+.dev.pc .ico{stroke:var(--muted)}
+.d-lab{font:700 17px system-ui,sans-serif}
+.d-sub{font:500 14px var(--mono);fill:var(--muted)}
+.t-net{font:600 14px var(--mono);fill:var(--ospf)}
+.t-port{font:500 13px var(--mono);fill:var(--muted)}
+.reg{fill:var(--ospf-bg);stroke:var(--ospf);stroke-width:1.6;stroke-dasharray:6 5}
+.reg-t{font:600 14px system-ui,sans-serif;fill:var(--ospf)}
+.reg.a1{fill:rgba(31,95,174,.07);stroke:var(--accent)}
+.reg-t.a1{fill:var(--accent)}
+.reg.scen{fill:none;stroke:var(--line);stroke-dasharray:none;stroke-width:2}
+.reg-t.scen{fill:var(--muted);font-size:26px}
+.path{fill:none;stroke:var(--path);stroke-width:9;stroke-linejoin:round;stroke-linecap:round;opacity:.55}
+.path.back{stroke-dasharray:2 14;opacity:.9;stroke-width:8}
+.pbtns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.pbtns button{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}
+.pbtns button[aria-pressed="true"]{border-color:var(--path);color:var(--path);font-weight:600}
+#path-info{min-height:3.2em;font-size:14.5px;margin:6px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted);margin:6px 2px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend svg{width:34px;height:12px;min-width:0}
+footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker">Redes de Computadores · Prática · Lab 6</div>
+  <h1>OSPF no Packet Tracer: o arquivo da aula</h1>
+  <p>O que tem dentro de <code>OSPF-2026-10-19.pkt</code>, como a rede está configurada, o que esperar dos comandos <code>show</code> e como usar os dois cenários que vêm sem configuração.</p>
+  <div class="bar">
+    <span class="chip">Packet Tracer 8.2.2</span>
+    <span class="chip">36 equipamentos · 33 cabos</span>
+    <span class="chip">3 cenários independentes</span>
+    <span class="chip ospf">OSPF processo 1 · área 0</span>
+    <button class="theme-btn" id="theme" type="button" aria-label="Alternar tema claro/escuro">◐ tema</button>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sumário">
+  <b>Sumário</b>
+  <ol>
+    <li><a href="#resumo">Resumo em 30 segundos</a></li>
+    <li><a href="#mapa">Mapa do arquivo</a></li>
+    <li><a href="#cenario-a">Cenário A: a rede configurada</a></li>
+    <li><a href="#config-a">Configuração de cada roteador</a></li>
+    <li><a href="#rotas">Tabelas de rotas esperadas</a></li>
+    <li><a href="#usar">Como usar no Packet Tracer</a></li>
+    <li><a href="#experimentos">Experimentos</a></li>
+    <li><a href="#aula">Como a aula montou a rede (log)</a></li>
+    <li><a href="#cenario-b">Cenário B: “Exercício 2”</a></li>
+    <li><a href="#cenario-c">Cenário C: “Exercício 1”</a></li>
+    <li><a href="#erros">Erros comuns</a></li>
+    <li><a href="#cli">Referência rápida da CLI</a></li>
+    <li><a href="#fonte">Como este guia foi feito</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<section id="resumo">
+<h2><span class="n">1</span>Resumo em 30 segundos</h2>
+<ul>
+  <li>O arquivo tem <b>três redes separadas</b> na mesma área de trabalho, sem cabo entre elas. Só a de cima (<b>cenário A</b>) está configurada. As outras duas (<b>B</b> e <b>C</b>) têm apenas os equipamentos e os cabos: são os exercícios para você configurar. O enunciado delas está em <b>notas</b> na área de trabalho (“Exercicio 1” é o C, “Exercicio 2” é o B), com as redes e, no B, as áreas.</li>
+  <li><b>Cenário A:</b> três roteadores em linha (R0 — R3 — R4) falam <b>OSPF</b> entre si pelos enlaces <code>/30</code>. Cada ponta tem uma LAN <code>/24</code> com um PC. Um quarto roteador, o <b>R5</b>, <b>não roda OSPF</b>: está pendurado na LAN do R0 e leva a uma terceira LAN.</li>
+  <li>As LANs não entram no OSPF pelo comando <code>network</code>. Elas entram por <b>redistribuição</b> (<code>redistribute connected</code> e <code>redistribute static</code>). Por isso aparecem nos outros roteadores como <b>O E2</b> (rota externa), com métrica fixa 20.</li>
+  <li>O R5 só tem uma <b>rota default</b> apontando para o R0. O R0 tem uma <b>rota estática</b> para a LAN atrás do R5 e a injeta no OSPF.</li>
+</ul>
+<div class="warn">
+  <p><b>⚠️ Antes de mexer:</b> o R0 e o R5 têm alterações que <b>não foram salvas</b> com <code>write</code>. A <i>startup-config</i> do R0 ainda tem <code>network 10.0.0.0 0.0.0.255 area 0</code> e não tem os dois <code>redistribute</code>. A do R5 não tem a rota default. Ao abrir o arquivo, vale a configuração em execução (a da aula). Mas um <code>reload</code> ou desligar e ligar esses roteadores <b>volta à versão antiga</b>. Para manter o estado da aula, rode <code>write</code> nos dois assim que abrir. Ou aproveite e faça o <a href="#exp4">experimento 4</a> antes.</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="mapa">
+<h2><span class="n">2</span>Mapa do arquivo</h2>
+<p>As posições são as do próprio <code>.pkt</code>, lidas do XML. As linhas tracejadas são cabos <b>crossover</b> (roteador ↔ roteador) e as contínuas, <b>straight-through</b>. Equipamentos com contorno tracejado estão sem configuração.</p>
+<figure>
+  <div class="fig"><svg id="svg-overview" class="ov" role="img" aria-label="Mapa com os três cenários do arquivo"></svg></div>
+  <figcaption>Dois itens “Power Distribution Device” ficam fora do mapa (coordenada 3900, 3900). Eles só existem na visão física e não afetam nada.</figcaption>
+</figure>
+<div class="tbl"><table>
+  <thead><tr><th>Cenário</th><th>Equipamentos</th><th>Estado</th><th>Serve para</th></tr></thead>
+  <tbody>
+    <tr><td><b>A</b> (em cima, à esquerda)</td><td>4 roteadores 2621XM (R0, R3, R4, R5) · 3 switches 2960 · 3 PCs (nomeados pelo IP)</td><td><span class="ok">configurado</span></td><td>observar OSPF funcionando: vizinhos, tabela de rotas, rotas externas</td></tr>
+    <tr><td><b>B</b> (embaixo)</td><td>7 roteadores 2621XM (R1, R2, R6–R10) · 4 switches 2950T · PC0–PC3</td><td><span class="bad">só cabos</span></td><td>“Exercicio 2”: OSPF com <b>caminho redundante</b> (anel R1–R2–R7–R6), <b>áreas 0 e 1</b> e LANs estáticas</td></tr>
+    <tr><td><b>C</b> (em cima, à direita)</td><td>3 roteadores 2621XM (R11–R13) · 3 switches 2950T · PC4, PC5, Laptop0</td><td><span class="bad">só cabos</span></td><td>“Exercicio 1”: OSPF “puro”, triângulo com uma LAN em cada roteador</td></tr>
+  </tbody>
+</table></div>
+<p class="cap">Nenhum switch do arquivo tem configuração: todas as portas estão na VLAN 1. Os switches só servem para ligar PCs e roteadores na mesma LAN.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="cenario-a">
+<h2><span class="n">3</span>Cenário A: a rede configurada</h2>
+<figure>
+  <div class="fig"><svg id="svg-a" role="img" aria-label="Topologia do cenário A com portas e endereços"></svg></div>
+  <div class="legend">
+    <span><svg viewBox="0 0 34 12"><line x1="0" y1="6" x2="34" y2="6" class="lk"/></svg>straight-through</span>
+    <span><svg viewBox="0 0 34 12"><line x1="0" y1="6" x2="34" y2="6" class="lk cross"/></svg>crossover</span>
+    <span><svg viewBox="0 0 34 12"><rect x="1" y="1" width="32" height="10" rx="3" class="reg"/></svg>roda OSPF</span>
+    <span><code>.1</code> = último octeto do IP da porta, na rede escrita ao lado (ou embaixo do switch)</span>
+  </div>
+  <div class="pbtns" role="group" aria-label="Mostrar caminho de um ping">
+    <button type="button" data-path="none" aria-pressed="true">sem caminho</button>
+    <button type="button" data-path="ab" aria-pressed="false">10.0.0.2 → 10.0.1.2</button>
+    <button type="button" data-path="ac" aria-pressed="false">10.0.0.2 → 10.0.2.2 (ida)</button>
+    <button type="button" data-path="ca" aria-pressed="false">10.0.2.2 → 10.0.0.2 (volta)</button>
+    <button type="button" data-path="bc" aria-pressed="false">10.0.1.2 → 10.0.2.2</button>
+  </div>
+  <p id="path-info" aria-live="polite">Clique num ping para ver por onde o pacote passa.</p>
+</figure>
+
+<h3>Tabela de endereçamento</h3>
+<div class="tbl"><table>
+  <thead><tr><th>Equipamento</th><th>Porta</th><th>IP / máscara</th><th>Rede</th><th>Ligado a</th><th>Cabo</th></tr></thead>
+  <tbody>
+    <tr><td><b>R0</b> <span class="chip">router0</span></td><td>Fa0/0</td><td><code>192.168.0.1/30</code></td><td>192.168.0.0/30</td><td>R3 Fa0/1</td><td>crossover</td></tr>
+    <tr><td></td><td>Fa0/1</td><td><code>10.0.0.1/24</code></td><td>10.0.0.0/24</td><td>Switch0 Fa0/1</td><td>straight</td></tr>
+    <tr><td></td><td>Fa1/0</td><td><i>sem IP</i></td><td>—</td><td>— (módulo NM-1FE-TX, sem uso)</td><td>—</td></tr>
+    <tr><td><b>R3</b> <span class="chip">router3</span></td><td>Fa0/1</td><td><code>192.168.0.2/30</code></td><td>192.168.0.0/30</td><td>R0 Fa0/0</td><td>crossover</td></tr>
+    <tr><td></td><td>Fa0/0</td><td><code>192.168.0.5/30</code></td><td>192.168.0.4/30</td><td>R4 Fa0/1</td><td>crossover</td></tr>
+    <tr><td><b>R4</b> <span class="chip">router4</span></td><td>Fa0/1</td><td><code>192.168.0.6/30</code></td><td>192.168.0.4/30</td><td>R3 Fa0/0</td><td>crossover</td></tr>
+    <tr><td></td><td>Fa0/0</td><td><code>10.0.1.1/24</code></td><td>10.0.1.0/24</td><td>Switch1 Fa0/1</td><td>straight</td></tr>
+    <tr><td><b>R5</b> <span class="chip">router5</span></td><td>Fa0/1</td><td><code>10.0.0.3/24</code></td><td>10.0.0.0/24</td><td>Switch0 Fa0/3</td><td>straight</td></tr>
+    <tr><td></td><td>Fa0/0</td><td><code>10.0.2.1/24</code></td><td>10.0.2.0/24</td><td>Switch2 Fa0/2</td><td>straight</td></tr>
+    <tr><td>PC <b>10.0.0.2/24</b></td><td>Fa0</td><td><code>10.0.0.2/24</code> · gw <code>10.0.0.1</code></td><td>10.0.0.0/24</td><td>Switch0 Fa0/2</td><td>straight</td></tr>
+    <tr><td>PC <b>10.0.1.2/24</b></td><td>Fa0</td><td><code>10.0.1.2/24</code> · gw <code>10.0.1.1</code></td><td>10.0.1.0/24</td><td>Switch1 Fa0/2</td><td>straight</td></tr>
+    <tr><td>PC <b>10.0.2.2</b></td><td>Fa0</td><td><code>10.0.2.2/24</code> · gw <code>10.0.2.1</code></td><td>10.0.2.0/24</td><td>Switch2 Fa0/1</td><td>straight</td></tr>
+  </tbody>
+</table></div>
+<p class="cap">Os PCs do cenário A não se chamam PC0, PC1…: o nome de cada um é o próprio IP. O hostname dos roteadores (<code>router0</code> etc.) é minúsculo; o nome no canvas é <code>Router0</code>.</p>
+
+<h3>Por que esse desenho</h3>
+<ul>
+  <li><b>Enlaces <code>/30</code> entre roteadores.</b> Um <code>/30</code> tem exatamente 2 IPs de host: um para cada ponta. É o padrão para ligação ponto a ponto. Os dois enlaces saem de <code>192.168.0.0/24</code>: blocos <code>.0/30</code> e <code>.4/30</code>.</li>
+  <li><b>O OSPF só roda nos enlaces <code>/30</code>.</b> Os três roteadores têm <code>network</code> só para os <code>/30</code>. As LANs <code>10.0.x.0/24</code> ficam fora da área e entram por redistribuição. Por isso o R0 e o R4 são <b>ASBR</b> (<i>Autonomous System Boundary Router</i>): roteadores que injetam rotas de fora no OSPF.</li>
+  <li><b>O R5 representa um roteador que não fala OSPF</b> (outro domínio, equipamento legado, cliente). O R0 alcança a LAN dele por <b>rota estática</b> e a anuncia ao resto da rede com <code>redistribute static subnets</code>. Na volta, o R5 manda tudo para o R0 pela <b>rota default</b>.</li>
+  <li><b>O R5 e o R0 estão na mesma LAN</b> (10.0.0.0/24, via Switch0). Isso cria um caminho <b>assimétrico</b>: veja os botões de ping acima e a <a href="#matriz">matriz de ping</a>.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="config-a">
+<h2><span class="n">4</span>Configuração de cada roteador</h2>
+<p>Trechos do <code>show running-config</code> salvo no arquivo (sem as linhas padrão <code>duplex auto</code>, <code>speed auto</code>, <code>line …</code>). Em <span class="hl" style="color:var(--ospf);font-weight:600">verde</span> o OSPF, em <span style="color:var(--ext);font-weight:600">roxo</span> a redistribuição e em <span style="color:var(--accent);font-weight:600">azul</span> as rotas estáticas.</p>
+<div class="grid2">
+<div>
+<h3>R0 · router0 <span class="chip">ASBR</span></h3>
+<pre><code>hostname router0
+interface FastEthernet0/0
+ ip address 192.168.0.1 255.255.255.252
+interface FastEthernet0/1
+ ip address 10.0.0.1 255.255.255.0
+<span class="hl">router ospf 1</span>
+<span class="hl"> log-adjacency-changes</span>
+<span class="ex"> redistribute static subnets</span>
+<span class="ex"> redistribute connected subnets</span>
+<span class="hl"> network 192.168.0.0 0.0.0.3 area 0</span>
+<span class="st">ip route 10.0.2.0 255.255.255.0 10.0.0.3</span></code></pre>
+</div>
+<div>
+<h3>R3 · router3 <span class="chip">só OSPF</span></h3>
+<pre><code>hostname router3
+interface FastEthernet0/0
+ ip address 192.168.0.5 255.255.255.252
+interface FastEthernet0/1
+ ip address 192.168.0.2 255.255.255.252
+<span class="hl">router ospf 1</span>
+<span class="hl"> log-adjacency-changes</span>
+<span class="hl"> network 192.168.0.0 0.0.0.3 area 0</span>
+<span class="hl"> network 192.168.0.4 0.0.0.3 area 0</span></code></pre>
+</div>
+<div>
+<h3>R4 · router4 <span class="chip">ASBR</span></h3>
+<pre><code>hostname router4
+interface FastEthernet0/0
+ ip address 10.0.1.1 255.255.255.0
+interface FastEthernet0/1
+ ip address 192.168.0.6 255.255.255.252
+<span class="hl">router ospf 1</span>
+<span class="hl"> log-adjacency-changes</span>
+<span class="ex"> redistribute connected subnets</span>
+<span class="hl"> network 192.168.0.4 0.0.0.3 area 0</span></code></pre>
+</div>
+<div>
+<h3>R5 · router5 <span class="chip wn">sem OSPF</span></h3>
+<pre><code>hostname router5
+interface FastEthernet0/0
+ ip address 10.0.2.1 255.255.255.0
+interface FastEthernet0/1
+ ip address 10.0.0.3 255.255.255.0
+<span class="st">ip route 0.0.0.0 0.0.0.0 10.0.0.1</span></code></pre>
+</div>
+</div>
+
+<h3>O que cada comando faz</h3>
+<dl class="cmds">
+  <dt>router ospf 1</dt>
+  <dd>Liga um processo OSPF. O <code>1</code> é um número <b>local</b>: não precisa ser igual nos vizinhos (aqui é 1 em todos por convenção). O que precisa coincidir é a <b>área</b>.</dd>
+  <dt>network 192.168.0.0 0.0.0.3 area 0</dt>
+  <dd>Ativa o OSPF em toda interface cujo IP “case” com <code>192.168.0.0</code> sob a <b>wildcard</b> <code>0.0.0.3</code>. Nessa interface o roteador manda <i>Hellos</i>, forma vizinhança e anuncia a rede. A wildcard é o inverso da máscara: <code>255.255.255.255 − 255.255.255.252 = 0.0.0.3</code>. Para <code>/24</code>, <code>0.0.0.255</code>.</dd>
+  <dt>redistribute connected subnets</dt>
+  <dd>Injeta no OSPF as redes <b>diretamente conectadas</b>, inclusive as que não estão em nenhum <code>network</code> (aqui, as LANs). Nos outros roteadores elas aparecem como <b>O E2</b>. Sem a palavra <code>subnets</code>, o IOS só redistribui redes com máscara classful, e <code>10.0.x.0/24</code> (sub-rede de classe A) ficaria de fora.</dd>
+  <dt>redistribute static subnets</dt>
+  <dd>Injeta as <b>rotas estáticas</b>, no caso a <code>10.0.2.0/24</code> atrás do R5.</dd>
+  <dt>ip route 10.0.2.0 255.255.255.0 10.0.0.3</dt>
+  <dd>Rota estática: “para chegar em 10.0.2.0/24, entregue ao 10.0.0.3” (R5). O próximo salto precisa estar numa rede conectada; aqui, a LAN do Switch0.</dd>
+  <dt>ip route 0.0.0.0 0.0.0.0 10.0.0.1</dt>
+  <dd>Rota <b>default</b> do R5: tudo que ele não conhece vai para o R0. Aparece como <code>S*</code> e como <i>Gateway of last resort</i>.</dd>
+  <dt>log-adjacency-changes</dt>
+  <dd>Entra sozinho ao criar o processo. Gera uma mensagem no console quando um vizinho sobe ou cai (<code>%OSPF-5-ADJCHG … from LOADING to FULL</code>).</dd>
+</dl>
+
+<div class="note">
+  <p><b>Máscara no lugar da wildcard.</b> Na aula, o comando foi digitado como <code>network 192.168.0.0 255.255.255.252 area 0</code> (máscara). O Packet Tracer converteu sozinho para <code>0.0.0.3</code>, como mostra a running-config. Na prova, escreva a <b>wildcard</b>: a P2 de 2023 (questão 9) pede justamente para achar erros nas linhas <code>network</code>.</p>
+</div>
+
+<details>
+  <summary>Recriar o cenário A do zero (blocos para colar na CLI)</summary>
+  <p>Mesma ordem da aula, já na versão final. Útil se você apagar algo ou quiser montar em outro arquivo.</p>
+  <div class="grid2">
+<pre><code>enable
+configure terminal
+hostname router0
+interface fastEthernet 0/1
+ ip address 10.0.0.1 255.255.255.0
+ no shutdown
+interface fastEthernet 0/0
+ ip address 192.168.0.1 255.255.255.252
+ no shutdown
+exit
+ip route 10.0.2.0 255.255.255.0 10.0.0.3
+router ospf 1
+ network 192.168.0.0 0.0.0.3 area 0
+ redistribute connected subnets
+ redistribute static subnets
+end
+write</code></pre>
+<pre><code>enable
+configure terminal
+hostname router3
+interface fastEthernet 0/1
+ ip address 192.168.0.2 255.255.255.252
+ no shutdown
+interface fastEthernet 0/0
+ ip address 192.168.0.5 255.255.255.252
+ no shutdown
+exit
+router ospf 1
+ network 192.168.0.0 0.0.0.3 area 0
+ network 192.168.0.4 0.0.0.3 area 0
+end
+write</code></pre>
+<pre><code>enable
+configure terminal
+hostname router4
+interface fastEthernet 0/1
+ ip address 192.168.0.6 255.255.255.252
+ no shutdown
+interface fastEthernet 0/0
+ ip address 10.0.1.1 255.255.255.0
+ no shutdown
+exit
+router ospf 1
+ network 192.168.0.4 0.0.0.3 area 0
+ redistribute connected subnets
+end
+write</code></pre>
+<pre><code>enable
+configure terminal
+hostname router5
+interface fastEthernet 0/0
+ ip address 10.0.2.1 255.255.255.0
+ no shutdown
+interface fastEthernet 0/1
+ ip address 10.0.0.3 255.255.255.0
+ no shutdown
+exit
+ip route 0.0.0.0 0.0.0.0 10.0.0.1
+end
+write</code></pre>
+  </div>
+  <p class="cap">PCs: Desktop → IP Configuration → Static, com IP, máscara 255.255.255.0 e o gateway da tabela de endereçamento.</p>
+</details>
+</section>
+
+<!-- ============================================================ -->
+<section id="rotas">
+<h2><span class="n">5</span>Tabelas de rotas esperadas</h2>
+<p>É uma <b>previsão</b> calculada a partir das configurações, no formato do IOS 12.2 dos 2621XM (sem as rotas <code>L</code> do IOS 15). Os temporizadores (<code>00:12:34</code>) foram omitidos. O custo OSPF de uma FastEthernet é <code>100 Mb/s ÷ 100 Mb/s = 1</code>.</p>
+<div class="grid2">
+<div>
+<h3>R0 · <code>show ip route</code></h3>
+<pre><code>Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 3 subnets
+C       10.0.0.0 is directly connected, FastEthernet0/1
+<span class="ex">O E2</span>    10.0.1.0 [110/20] via 192.168.0.2, FastEthernet0/0
+<span class="st">S</span>       10.0.2.0 [1/0] via 10.0.0.3
+     192.168.0.0/30 is subnetted, 2 subnets
+C       192.168.0.0 is directly connected, FastEthernet0/0
+<span class="hl">O</span>       192.168.0.4 [110/2] via 192.168.0.2, FastEthernet0/0</code></pre>
+</div>
+<div>
+<h3>R3 · <code>show ip route</code></h3>
+<pre><code>Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 3 subnets
+<span class="ex">O E2</span>    10.0.0.0 [110/20] via 192.168.0.1, FastEthernet0/1
+<span class="ex">O E2</span>    10.0.1.0 [110/20] via 192.168.0.6, FastEthernet0/0
+<span class="ex">O E2</span>    10.0.2.0 [110/20] via 192.168.0.1, FastEthernet0/1
+     192.168.0.0/30 is subnetted, 2 subnets
+C       192.168.0.0 is directly connected, FastEthernet0/1
+C       192.168.0.4 is directly connected, FastEthernet0/0</code></pre>
+</div>
+<div>
+<h3>R4 · <code>show ip route</code></h3>
+<pre><code>Gateway of last resort is not set
+
+     10.0.0.0/24 is subnetted, 3 subnets
+<span class="ex">O E2</span>    10.0.0.0 [110/20] via 192.168.0.5, FastEthernet0/1
+C       10.0.1.0 is directly connected, FastEthernet0/0
+<span class="ex">O E2</span>    10.0.2.0 [110/20] via 192.168.0.5, FastEthernet0/1
+     192.168.0.0/30 is subnetted, 2 subnets
+<span class="hl">O</span>       192.168.0.0 [110/2] via 192.168.0.5, FastEthernet0/1
+C       192.168.0.4 is directly connected, FastEthernet0/1</code></pre>
+</div>
+<div>
+<h3>R5 · <code>show ip route</code></h3>
+<pre><code>Gateway of last resort is 10.0.0.1 to network 0.0.0.0
+
+     10.0.0.0/24 is subnetted, 2 subnets
+C       10.0.0.0 is directly connected, FastEthernet0/1
+C       10.0.2.0 is directly connected, FastEthernet0/0
+<span class="st">S*</span>   0.0.0.0/0 [1/0] via 10.0.0.1</code></pre>
+</div>
+</div>
+
+<h3>Como ler</h3>
+<div class="tbl"><table>
+  <thead><tr><th>Código</th><th>Significa</th><th>Exemplo aqui</th></tr></thead>
+  <tbody>
+    <tr><td><code>C</code></td><td>rede diretamente conectada</td><td>as duas redes de cada roteador</td></tr>
+    <tr><td><code>S</code></td><td>rota estática</td><td>R0 → 10.0.2.0/24 via R5</td></tr>
+    <tr><td><code>S*</code></td><td>rota estática default (candidata a <i>gateway of last resort</i>)</td><td>R5 → 0.0.0.0/0 via R0</td></tr>
+    <tr><td><code>O</code></td><td>OSPF intra-área: rede anunciada por <code>network</code> dentro da área</td><td>o <code>/30</code> do outro lado</td></tr>
+    <tr><td><code>O E2</code></td><td>OSPF externa tipo 2: rede <b>redistribuída</b> por um ASBR. A métrica fica fixa (20 por padrão) e não soma o custo dos enlaces.</td><td>todas as LANs <code>10.0.x.0/24</code></td></tr>
+  </tbody>
+</table></div>
+<ul>
+  <li><code>[110/2]</code>: <b>110</b> é a distância administrativa do OSPF (a estática é 1). <b>2</b> é o custo: saída do R0 (1) mais a saída do R3 rumo ao R4 (1).</li>
+  <li><code>[110/20]</code> em todas as <b>E2</b>, de perto ou de longe: a E2 não soma custo interno. É por isso que o R4 vê a LAN do R0 com 20, e não 22.</li>
+  <li>Se a LAN entrasse por <code>network 10.0.1.0 0.0.0.255 area 0</code> no R4, o R0 a veria como <code>O 10.0.1.0 [110/3]</code> (1 + 1 + 1). Compare no <a href="#exp1">experimento 1</a>.</li>
+</ul>
+
+<h3>Router-ID e DR/BDR</h3>
+<p>Sem <code>router-id</code> nem interface loopback configurados, o OSPF escolhe como Router-ID o <b>maior IP entre as interfaces ativas</b>:</p>
+<div class="tbl"><table>
+  <thead><tr><th>Roteador</th><th>IPs ativos</th><th>Router-ID</th><th>Vizinhos (<code>show ip ospf neighbor</code>)</th></tr></thead>
+  <tbody>
+    <tr><td>R0</td><td>10.0.0.1 · 192.168.0.1</td><td><code>192.168.0.1</code></td><td>192.168.0.5 (R3) — FULL/DR</td></tr>
+    <tr><td>R3</td><td>192.168.0.2 · 192.168.0.5</td><td><code>192.168.0.5</code></td><td>192.168.0.1 (R0) — FULL/BDR · 192.168.0.6 (R4) — FULL/DR</td></tr>
+    <tr><td>R4</td><td>10.0.1.1 · 192.168.0.6</td><td><code>192.168.0.6</code></td><td>192.168.0.5 (R3) — FULL/BDR</td></tr>
+    <tr><td>R5</td><td>—</td><td>sem OSPF</td><td>—</td></tr>
+  </tbody>
+</table></div>
+<p>Enlace Ethernet é rede de <b>broadcast</b> para o OSPF, então cada <code>/30</code> elege um DR e um BDR. Com prioridade igual (1), ganha o <b>maior Router-ID</b>. A tabela acima vale quando os roteadores sobem juntos, como ao abrir o arquivo. A eleição <b>não é preemptiva</b>: se um roteador sobe depois, ele não toma o lugar do DR atual. Por isso o resultado pode variar conforme a ordem em que você liga ou reinicia os roteadores.</p>
+<pre><code><span class="cm">R3# show ip ospf neighbor   (previsão)</span>
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.168.0.6       1   FULL/DR         00:00:3x    192.168.0.6     FastEthernet0/0
+192.168.0.1       1   FULL/BDR        00:00:3x    192.168.0.1     FastEthernet0/1</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="usar">
+<h2><span class="n">6</span>Como usar no Packet Tracer</h2>
+<ol>
+  <li><b>Abra</b> <code>OSPF-2026-10-19.pkt</code> no Packet Tracer 8.2 ou mais novo (o arquivo foi salvo na 8.2.2; a 9.x abre normalmente).</li>
+  <li><b>Espere a rede convergir.</b> Ao abrir, os roteadores refazem a vizinhança OSPF: <i>Hello</i> a cada 10 s, e a eleição de DR espera até 40 s. Dê de 40 s a 1 min, ou clique várias vezes em <b>Fast Forward Time</b> (barra inferior, modo Realtime). Os pontos dos cabos ficam verdes.</li>
+  <li><b>Decida sobre o <code>write</code></b> em R0 e R5 (veja o <a href="#resumo">aviso</a>). Para guardar o estado da aula: <code>enable</code> → <code>write</code> em cada um.</li>
+  <li><b>Observe</b> com os comandos abaixo, em modo privilegiado (<code>router0#</code>). Clique no roteador → aba <b>CLI</b> → Enter → <code>enable</code>.</li>
+  <li><b>Teste</b> com <code>ping</code> e <code>tracert</code> nos PCs (Desktop → Command Prompt), seguindo a <a href="#matriz">matriz</a>.</li>
+  <li><b>Veja os pacotes</b> no modo Simulation (abaixo) e depois faça os <a href="#experimentos">experimentos</a>.</li>
+</ol>
+
+<h3>Comandos de observação</h3>
+<div class="tbl"><table>
+  <thead><tr><th>Comando</th><th>O que olhar</th><th>Onde rodar</th></tr></thead>
+  <tbody>
+    <tr><td><code>show ip interface brief</code></td><td>Interfaces com IP e <code>up/up</code>. Se aparecer <code>administratively down</code>, falta <code>no shutdown</code>.</td><td>todos</td></tr>
+    <tr><td><code>show ip route</code></td><td>Códigos <code>C</code>, <code>O</code>, <code>O E2</code>, <code>S</code>, <code>S*</code>; comparar com a <a href="#rotas">seção 5</a>.</td><td>todos</td></tr>
+    <tr><td><code>show ip ospf neighbor</code></td><td>Vizinhos em <code>FULL</code>, papel DR/BDR, endereço e interface.</td><td>R0, R3, R4</td></tr>
+    <tr><td><code>show ip ospf interface</code></td><td>Área, custo (<code>Cost: 1</code>), tipo de rede <code>BROADCAST</code>, DR/BDR, <code>Hello 10, Dead 40</code>.</td><td>R0, R3, R4</td></tr>
+    <tr><td><code>show ip ospf</code></td><td>Router-ID. No R0 e no R4: <i>“It is an autonomous system boundary router”</i> (ASBR).</td><td>R0, R3, R4</td></tr>
+    <tr><td><code>show ip ospf database</code></td><td>LSDB: <i>Router Link States</i> (um por roteador, 3), <i>Net Link States</i> (um por enlace com DR, 2) e <i>Type-5 AS External</i> (as LANs redistribuídas).</td><td>qualquer um; é igual nos três</td></tr>
+    <tr><td><code>show ip protocols</code></td><td>Redes do <code>network</code>, o que é redistribuído e de quem vêm as rotas.</td><td>R0, R4</td></tr>
+    <tr><td><code>show running-config</code></td><td>Conferir a configuração da <a href="#config-a">seção 4</a>.</td><td>todos</td></tr>
+  </tbody>
+</table></div>
+<p class="cap">A LSDB igual em todos os roteadores da área é o ponto central do OSPF (estado de enlace): cada roteador tem o mapa completo e roda Dijkstra sobre ele.</p>
+
+<h3 id="matriz">Matriz de ping e tracert (previsão)</h3>
+<p>Todos os pings devem funcionar (<span class="ok">OK</span>). A primeira resposta pode vir <code>Request timed out</code>, porque o ARP ainda está resolvendo: repita o ping.</p>
+<div class="tbl"><table>
+  <thead><tr><th>De \ Para</th><th>10.0.0.2</th><th>10.0.1.2</th><th>10.0.2.2</th></tr></thead>
+  <tbody>
+    <tr><th>10.0.0.2</th><td>—</td><td><span class="ok">OK</span> · 4 saltos</td><td><span class="ok">OK</span> · 3 saltos</td></tr>
+    <tr><th>10.0.1.2</th><td><span class="ok">OK</span></td><td>—</td><td><span class="ok">OK</span> · 5 saltos</td></tr>
+    <tr><th>10.0.2.2</th><td><span class="ok">OK</span> · 2 saltos</td><td><span class="ok">OK</span></td><td>—</td></tr>
+  </tbody>
+</table></div>
+<pre><code><span class="cm">C:\&gt; tracert 10.0.1.2        (de 10.0.0.2)</span>
+  1   10.0.0.1       <span class="cm">R0 (gateway)</span>
+  2   192.168.0.2    <span class="cm">R3</span>
+  3   192.168.0.6    <span class="cm">R4</span>
+  4   10.0.1.2
+
+<span class="cm">C:\&gt; tracert 10.0.2.2        (de 10.0.0.2)</span>
+  1   10.0.0.1       <span class="cm">R0 (gateway)…</span>
+  2   10.0.0.3       <span class="cm">…que devolve para a MESMA LAN, ao R5</span>
+  3   10.0.2.2
+
+<span class="cm">C:\&gt; tracert 10.0.0.2        (de 10.0.2.2)</span>
+  1   10.0.2.1       <span class="cm">R5 (gateway)</span>
+  2   10.0.0.2       <span class="cm">R5 está na 10.0.0.0/24: entrega direto, sem passar pelo R0</span>
+
+<span class="cm">C:\&gt; tracert 10.0.2.2        (de 10.0.1.2)</span>
+  1   10.0.1.1       <span class="cm">R4</span>
+  2   192.168.0.5    <span class="cm">R3</span>
+  3   192.168.0.1    <span class="cm">R0 (rota O E2 → estática redistribuída)</span>
+  4   10.0.0.3       <span class="cm">R5</span>
+  5   10.0.2.2</code></pre>
+<div class="note">
+  <p><b>Caminho assimétrico.</b> De 10.0.0.2 para 10.0.2.2, o pacote vai ao R0 (o gateway do PC) e volta pela mesma interface até o R5: o R0 faz um “vai e volta” na LAN. A resposta não passa pelo R0, porque o R5 está ligado na 10.0.0.0/24 e entrega direto. No <code>tracert</code>, a ida mostra 3 saltos e a volta, 2. Um roteador Cisco real costuma mandar um <i>ICMP Redirect</i> ao PC nesse caso; não conte com isso no Packet Tracer.</p>
+</div>
+
+<h3>Modo Simulation</h3>
+<ol>
+  <li>Clique em <b>Simulation</b> (canto inferior direito). Em <b>Edit Filters</b>, deixe marcados só <b>OSPF</b> e <b>ICMP</b> (e <b>ARP</b>, se quiser ver a resolução de MAC).</li>
+  <li>Clique em <b>Play</b>. Aparecem pacotes <b>OSPF Hello</b> a cada 10 s nos dois enlaces <code>/30</code>. Não aparece nenhum nas LANs, porque nenhuma LAN está num <code>network</code>.</li>
+  <li>Faça uma alteração (por exemplo, o <a href="#exp1">experimento 1</a>) e veja os pacotes <b>LSU</b> e <b>LSAck</b> espalhando a mudança.</li>
+  <li>Para o ping: <i>Add Simple PDU</i> (envelope) de um PC para outro e avance com <b>Capture/Forward</b>. Clique no envelope em cada salto: o IP de destino não muda, o MAC é reescrito em cada roteador e o TTL cai 1 (como no Lab 4).</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section id="experimentos">
+<h2><span class="n">7</span>Experimentos</h2>
+<p>Anote a previsão <b>antes</b> de rodar. Cada experimento mexe em uma coisa só e tem o desfazer no final.</p>
+
+<h3 id="exp1">1 · LAN redistribuída × LAN anunciada com <code>network</code></h3>
+<pre><code>router4# configure terminal
+router4(config)# router ospf 1
+router4(config-router)# no redistribute connected subnets
+router4(config-router)# end
+router0# show ip route          <span class="cm">← a 10.0.1.0 sumiu</span></code></pre>
+<p><b>Previsão:</b> a <code>10.0.1.0/24</code> some de R0 e R3. O ping 10.0.0.2 → 10.0.1.2 falha com <code>Reply from 10.0.0.1: Destination host unreachable</code>: o próprio R0 avisa que não tem rota. Agora anuncie a LAN do jeito “normal”:</p>
+<pre><code>router4(config)# router ospf 1
+router4(config-router)# network 10.0.1.0 0.0.0.255 area 0
+router0# show ip route          <span class="cm">← O 10.0.1.0 [110/3] (antes: O E2 [110/20])</span></code></pre>
+<p><b>Previsão:</b> a rota volta como <code>O</code> (intra-área) com custo 3, e o R4 passa a mandar Hellos na LAN 10.0.1.0 (veja no Simulation). <b>Desfazer:</b> <code>no network 10.0.1.0 0.0.0.255 area 0</code> e <code>redistribute connected subnets</code>.</p>
+
+<h3 id="exp2">2 · Derrubar um enlace</h3>
+<pre><code>router3(config)# interface fastEthernet 0/0
+router3(config-if)# shutdown</code></pre>
+<p><b>Previsão:</b> mensagem <code>%OSPF-5-ADJCHG … from FULL to DOWN</code> no R3 e no R4. O R0 perde a <code>192.168.0.4/30</code> e a <code>10.0.1.0/24</code>, e o R4 perde todas as rotas OSPF. O cenário A é uma linha, sem caminho alternativo; compare com o <a href="#cenario-b">anel do cenário B</a>. <b>Desfazer:</b> <code>no shutdown</code> e esperar a vizinhança voltar a <code>FULL</code>.</p>
+
+<h3 id="exp3">3 · Wildcard errada</h3>
+<pre><code>router3(config)# router ospf 1
+router3(config-router)# no network 192.168.0.4 0.0.0.3 area 0
+router3(config-router)# network 192.168.0.8 0.0.0.3 area 0</code></pre>
+<p><b>Previsão:</b> <code>192.168.0.8/30</code> não casa com nenhuma interface do R3 (o IP é 192.168.0.5), então o OSPF para de rodar na Fa0/0. No R3 a vizinhança cai na hora. No R4 ela só cai depois do <i>dead interval</i> (40 s): ele para de receber Hellos, mas a interface continua <code>up</code>, então ele espera. Compare com o experimento 2, em que o cabo “cai” e os dois lados percebem na hora. <b>Desfazer:</b> trocar de volta para <code>192.168.0.4 0.0.0.3</code>.</p>
+
+<h3 id="exp4">4 · <code>reload</code> sem <code>write</code></h3>
+<p>Faça <b>antes</b> de dar <code>write</code> no R0. No <code>reload</code>, o IOS pergunta <code>System configuration has been modified. Save? [yes/no]:</code>. Responda <b><code>no</code></b>, senão ele salva.</p>
+<pre><code>router0# reload
+System configuration has been modified. Save? [yes/no]: no
+Proceed with reload? [confirm]   <span class="cm">← Enter</span></code></pre>
+<p><b>Previsão:</b> o R0 volta com a <i>startup-config</i> antiga: <code>network 10.0.0.0 0.0.0.255 area 0</code> e nenhum <code>redistribute</code>. Então:</p>
+<ul>
+  <li>a <code>10.0.0.0/24</code> vira <code>O</code> (não mais <code>O E2</code>) no R3 <code>[110/2]</code> e no R4 <code>[110/3]</code>, e o R0 passa a mandar Hellos na LAN do Switch0;</li>
+  <li>a <code>10.0.2.0/24</code> some do R3 e do R4, porque a estática não é mais redistribuída: 10.0.1.2 → 10.0.2.2 <span class="bad">falha</span>;</li>
+  <li>10.0.0.2 ↔ 10.0.2.2 continua <span class="ok">OK</span>: a estática no R0 continua lá, porque já tinha sido salva.</li>
+</ul>
+<p>Com o R5 é o mesmo: sem a default, ele não sabe voltar para 10.0.1.2, e o ping de 10.0.1.2 para 10.0.2.2 morre na resposta. <b>Desfazer:</b> colar os comandos que faltam (seção 4) e dar <code>write</code>.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="aula">
+<h2><span class="n">8</span>Como a aula montou a rede (log de comandos)</h2>
+<p>O <code>.pkt</code> guarda o histórico de tudo que foi digitado nas CLIs. A rede foi montada em <b>24/05/2024</b>, das 08:14 às 09:18. O arquivo foi aberto de novo em <b>18/10/2026</b>, só para um <code>show running-config</code> no R0 e no R5. A sequência é uma boa ordem de estudo:</p>
+<div class="tbl"><table>
+  <thead><tr><th>Hora</th><th>Onde</th><th>O que foi feito</th><th>Para mostrar</th></tr></thead>
+  <tbody>
+    <tr><td>08:14–08:18</td><td>R0, R3, R4</td><td><code>hostname</code>, IP e <code>no shutdown</code> nas interfaces; <code>write</code></td><td>roteador sobe com tudo em shutdown</td></tr>
+    <tr><td>08:20</td><td>R3</td><td><code>show ip route</code></td><td>só rotas <code>C</code>: sem protocolo, ninguém conhece a rede do vizinho</td></tr>
+    <tr><td>08:21–08:28</td><td>R0, R3</td><td><code>router ospf 1</code> e <code>network 192.168.0.0 255.255.255.252 area 0</code> nos dois; <code>show ip ospf</code>, <code>… neighbor</code>, <code>… interface</code>, <code>… database</code></td><td>primeira vizinhança; a máscara vira wildcard</td></tr>
+    <tr><td>08:29–08:34</td><td>R3, R4</td><td><code>network 192.168.0.4 … area 0</code> no R3 e depois no R4; <code>ping 192.168.0.6</code> do R0 antes e depois</td><td>o ping só funciona quando o R4 entra no OSPF</td></tr>
+    <tr><td>08:36</td><td>R0</td><td><code>network 10.0.0.0 255.255.255.0 area 0</code></td><td>LAN anunciada como <code>O</code></td></tr>
+    <tr><td>08:42–08:47</td><td>R4</td><td><code>redistribute connected subnets</code>; <code>write</code> em R4, R3, R0</td><td>LAN redistribuída aparece como <code>O E2</code></td></tr>
+    <tr><td>08:51–08:57</td><td>R5</td><td>IPs, <code>write</code>; ping 10.0.0.2 e 10.0.0.1</td><td>roteador fora do OSPF, só com redes conectadas</td></tr>
+    <tr><td>08:58–09:00</td><td>R0</td><td><code>ip route 10.0.2.0 255.255.255.0 10.0.0.3</code>; <code>write</code>; <code>ping 10.0.2.2</code></td><td>rota estática para a LAN atrás do R5</td></tr>
+    <tr><td>09:03–09:04</td><td>R0, R3</td><td><code>redistribute static subnets</code>; R3 roda <code>show ip route</code> cinco vezes seguidas</td><td>esperar a <code>10.0.2.0</code> aparecer como <code>O E2</code> no R3</td></tr>
+    <tr><td>09:07</td><td>R5</td><td><code>ip route 0.0.0.0 0.0.0.0 10.0.0.1</code> <span class="chip wn">não salvo</span></td><td>rota default para o R5 saber voltar</td></tr>
+    <tr><td>09:17</td><td>R0</td><td><code>no network 10.0.0.0 0.0.0.255 area 0</code> + <code>redistribute connected subnets</code> <span class="chip wn">não salvo</span></td><td>a LAN do R0 passa de <code>O</code> para <code>O E2</code>, igual à do R4</td></tr>
+  </tbody>
+</table></div>
+<h3>O que o gabarito acrescenta (aula de 21/10/2026)</h3>
+<p>O gabarito (<code>OSPF-2026-10-19-gabarito.pkt</code>) guarda mais 376 comandos. No cenário A, das 08:13 às 08:46, o professor fez dois dos experimentos deste guia:</p>
+<ul>
+  <li><code>show ip ospf neighbor</code> e <code>show ip ospf database</code> no R3, e <code>clear ip ospf process</code>.</li>
+  <li><b>Experimento 1:</b> no R4, <code>no redistribute connected subnets</code> e <code>network 10.0.1.0 0.0.0.255 area 0</code>, olhando o <code>show ip route</code> do R0 antes e depois.</li>
+  <li><b>Experimento 2:</b> <code>shutdown</code> e <code>no shutdown</code> na Fa0/0 do R3.</li>
+</ul>
+<div class="warn">
+  <p><b>Estado final do cenário A no gabarito.</b> O R4 ficou com <code>network 10.0.1.0 0.0.0.255 area 0</code> na running-config, <b>sem salvar</b>: a startup dele ainda tem o <code>redistribute connected subnets</code>. Ao abrir o gabarito, o R0 e o R3 veem a <code>10.0.1.0</code> como <code>O [110/3]</code> e <code>O [110/2]</code> (é a previsão do <a href="#exp1">experimento 1</a>), não como <code>O E2 [110/20]</code>. O R0 e o R5 continuam como no arquivo original, também sem salvar. Este guia descreve o cenário A do arquivo original; o log completo está em <code>Pratica/lab6_ospf/gabarito_log_comandos.txt</code>.</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="cenario-b">
+<h2><span class="n">9</span>Cenário B: “Exercício 2” — anel com duas áreas <span class="chip ospf">gabarito</span></h2>
+<p>No arquivo original, os 7 roteadores e os 4 switches estão só cabeados: sem IP, interfaces em <code>shutdown</code>, PC0 a PC3 sem IP. O enunciado está em <b>notas</b> e <b>retângulos</b> na área de trabalho, e o <b>gabarito</b> do professor (<code>OSPF-2026-10-19-gabarito.pkt</code>, montado em 26/10/2026) mostra o estado final, que esta seção segue. A estrutura repete a ideia do cenário A, com dois ganhos: o <b>anel R1–R2–R7–R6</b> dá dois caminhos entre R1 e R7, e a rede tem <b>duas áreas OSPF</b>.</p>
+<div class="prop">
+  <p><b>O que as notas pedem.</b></p>
+  <ul>
+    <li><b>“OSPF Area 0”</b>: o anel R1–R2–R7–R6 (<code>192.168.1.0/30</code>, <code>.4/30</code>, <code>.8/30</code>, <code>.12/30</code>).</li>
+    <li><b>“OSPF Area 1”</b>: o enlace R7–R8 (<code>192.168.1.16/30</code>). O <b>R7 é ABR</b> (áreas 0 e 1); o R8 fica só na área 1.</li>
+    <li><b>“Estático”</b>: <code>10.0.1.0/24</code> (Switch5), <code>10.0.2.0/24</code> “Ambiente Estático” (Switch3), <code>10.0.3.0/24</code> (Switch4) e <code>10.0.4.0/24</code> (Switch6). Essas LANs ficam fora do OSPF, como as do cenário A: o R1 e o R8 as injetam por redistribuição.</li>
+  </ul>
+  <p><b>Nomes no gabarito.</b> O professor deu hostnames que não batem com os nomes do desenho. Este guia continua usando os nomes do desenho:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Desenho</th><th>Router1</th><th>Router2</th><th>Router6</th><th>Router7</th><th>Router8</th><th>Router9</th><th>Router10</th></tr></thead>
+    <tbody><tr><td>hostname</td><td><code>R1</code></td><td><code>R5</code></td><td><code>R6</code></td><td><code>R4</code></td><td><code>R3</code></td><td><code>R1</code> (repetido)</td><td><code>R2</code></td></tr></tbody>
+  </table></div>
+</div>
+<figure>
+  <div class="fig"><svg id="svg-b" role="img" aria-label="Topologia do cenário B com o endereçamento do gabarito"></svg></div>
+  <figcaption>Rótulos curtos: <code>.4/30</code> = <code>192.168.1.4/30</code>, e <code>.1</code> = o último octeto do IP daquela ponta. As portas estão na tabela abaixo. R9 e R10 fazem o papel do R5: ficam fora do OSPF, numa LAN de um roteador OSPF (R1 e R8), e levam a outra LAN.</figcaption>
+</figure>
+
+<h3>Portas e cabos (do arquivo) e IPs (do gabarito)</h3>
+<div class="tbl"><table>
+  <thead><tr><th>Enlace</th><th>Portas</th><th>Cabo</th><th>Rede</th><th>Área</th><th>IPs</th></tr></thead>
+  <tbody>
+    <tr><td>R1 ↔ R2</td><td>R1 Fa0/0 · R2 Fa0/0</td><td>crossover</td><td><code>192.168.1.0/30</code></td><td>0</td><td>R2 .1 · R1 .2</td></tr>
+    <tr><td>R2 ↔ R7</td><td>R2 Fa0/1 · R7 Fa0/0</td><td>crossover</td><td><code>192.168.1.4/30</code></td><td>0</td><td>R7 .5 · R2 .6</td></tr>
+    <tr><td>R1 ↔ R6</td><td>R1 Fa0/1 · R6 Fa0/0</td><td>crossover</td><td><code>192.168.1.8/30</code></td><td>0</td><td>R6 .9 · R1 .10</td></tr>
+    <tr><td>R6 ↔ R7</td><td>R6 Fa0/1 · R7 Fa0/1</td><td>crossover</td><td><code>192.168.1.12/30</code></td><td>0</td><td>R7 .13 · R6 .14</td></tr>
+    <tr><td>R7 ↔ R8</td><td>R7 Fa1/0 · R8 Fa0/0</td><td>crossover</td><td><code>192.168.1.16/30</code></td><td><b>1</b></td><td>R7 .17 · R8 .18</td></tr>
+    <tr><td>LAN Switch3</td><td>R1 Fa1/0 → Fa0/1 · R9 Fa0/1 → Fa0/2 · PC2 → Fa0/3</td><td>straight</td><td><code>10.0.2.0/24</code></td><td>fora (estático)</td><td>R1 .1 · R9 .2 · PC2 .3</td></tr>
+    <tr><td>LAN Switch5</td><td>R9 Fa0/0 → Fa0/1 · PC0 → Fa0/2</td><td>straight</td><td><code>10.0.1.0/24</code></td><td>fora (estático)</td><td>R9 .1 · PC0 .2</td></tr>
+    <tr><td>LAN Switch4</td><td>R8 Fa0/1 → Fa0/1 · R10 Fa0/0 → Fa0/2 · PC1 → Fa0/3</td><td>straight</td><td><code>10.0.3.0/24</code></td><td>fora (estático)</td><td>R8 .1 · R10 .2 · PC1 .3</td></tr>
+    <tr><td>LAN Switch6</td><td>R10 Fa0/1 → Fa0/1 · PC3 → Fa0/2</td><td>straight</td><td><code>10.0.4.0/24</code></td><td>fora (estático)</td><td>R10 .1 · PC3 .2</td></tr>
+  </tbody>
+</table></div>
+<p class="cap">PCs (no gabarito eles se chamam pelo IP): máscara 255.255.255.0 e gateway = o <b>.1</b> da própria LAN (PC2 <code>10.0.2.3</code> → 10.0.2.1, PC0 <code>10.0.1.2</code> → 10.0.1.1, PC1 <code>10.0.3.3</code> → 10.0.3.1, PC3 <code>10.0.4.2</code> → 10.0.4.1). R1 e R7 têm o módulo NM-2FE2W, que dá a Fa1/0 e a Fa1/1. O cenário B não tem cabo para o A, então repetir <code>10.0.x.0</code> nas duas não causa conflito.</p>
+
+<details>
+  <summary>Configuração dos 7 roteadores (como no gabarito)</summary>
+  <p>O professor digitou os <code>network</code> com a máscara (<code>255.255.255.252</code>); o Packet Tracer converteu para a wildcard, que é o que aparece aqui.</p>
+  <div class="grid2">
+<pre><code><span class="cm">! Router1 (hostname R1)</span>
+enable
+configure terminal
+hostname R1
+interface fastEthernet 1/0
+ ip address 10.0.2.1 255.255.255.0
+ no shutdown
+interface fastEthernet 0/0
+ ip address 192.168.1.2 255.255.255.252
+ no shutdown
+interface fastEthernet 0/1
+ ip address 192.168.1.10 255.255.255.252
+ no shutdown
+exit
+ip route 10.0.1.0 255.255.255.0 10.0.2.2
+router ospf 1
+ network 192.168.1.0 0.0.0.3 area 0
+ network 192.168.1.8 0.0.0.3 area 0
+ redistribute connected subnets
+ redistribute static subnets
+end
+write</code></pre>
+<pre><code><span class="cm">! Router2 (hostname R5)</span>
+enable
+configure terminal
+hostname R5
+interface fastEthernet 0/0
+ ip address 192.168.1.1 255.255.255.252
+ no shutdown
+interface fastEthernet 0/1
+ ip address 192.168.1.6 255.255.255.252
+ no shutdown
+exit
+router ospf 1
+ network 192.168.1.4 0.0.0.3 area 0
+ network 192.168.1.0 0.0.0.3 area 0
+end
+write</code></pre>
+<pre><code><span class="cm">! Router6 (hostname R6)</span>
+enable
+configure terminal
+hostname R6
+interface fastEthernet 0/0
+ ip address 192.168.1.9 255.255.255.252
+ no shutdown
+interface fastEthernet 0/1
+ ip address 192.168.1.14 255.255.255.252
+ no shutdown
+exit
+router ospf 1
+ network 192.168.1.8 0.0.0.3 area 0
+ network 192.168.1.12 0.0.0.3 area 0
+end
+write</code></pre>
+<pre><code><span class="cm">! Router7 (hostname R4) — ABR</span>
+enable
+configure terminal
+hostname R4
+interface fastEthernet 1/0
+ ip address 192.168.1.17 255.255.255.252
+ no shutdown
+interface fastEthernet 0/0
+ ip address 192.168.1.5 255.255.255.252
+ no shutdown
+interface fastEthernet 0/1
+ ip address 192.168.1.13 255.255.255.252
+ no shutdown
+exit
+router ospf 1
+ network 192.168.1.16 0.0.0.3 area 1
+ network 192.168.1.4 0.0.0.3 area 0
+ network 192.168.1.12 0.0.0.3 area 0
+end
+write</code></pre>
+<pre><code><span class="cm">! Router8 (hostname R3) — área 1, ASBR</span>
+enable
+configure terminal
+hostname R3
+interface fastEthernet 0/1
+ ip address 10.0.3.1 255.255.255.0
+ no shutdown
+interface fastEthernet 0/0
+ ip address 192.168.1.18 255.255.255.252
+ no shutdown
+exit
+ip route 10.0.4.0 255.255.255.0 10.0.3.2
+router ospf 1
+ network 192.168.1.16 0.0.0.3 area 1
+ redistribute connected subnets
+ redistribute static subnets
+end
+write</code></pre>
+<pre><code><span class="cm">! Router9 (hostname R1) — sem OSPF</span>
+enable
+configure terminal
+hostname R1
+interface fastEthernet 0/0
+ ip address 10.0.1.1 255.255.255.0
+ no shutdown
+interface fastEthernet 0/1
+ ip address 10.0.2.2 255.255.255.0
+ no shutdown
+exit
+ip route 0.0.0.0 0.0.0.0 10.0.2.1
+end
+write</code></pre>
+<pre><code><span class="cm">! Router10 (hostname R2) — sem OSPF</span>
+enable
+configure terminal
+hostname R2
+interface fastEthernet 0/0
+ ip address 10.0.3.2 255.255.255.0
+ no shutdown
+interface fastEthernet 0/1
+ ip address 10.0.4.1 255.255.255.0
+ no shutdown
+exit
+ip route 10.0.0.0 255.0.0.0 10.0.3.1
+ip route 192.168.1.0 255.255.255.0 10.0.3.1
+end
+write</code></pre>
+  </div>
+  <p class="cap">Ordem em que o professor montou (log do gabarito, 26/10/2026, 10:34–11:21): R9 → R10 → R8 (pingou, viu que não chegava em <code>10.0.4.0</code>, pôs a estática e depois <code>redistribute static subnets</code>) → R7 → R2 → R6 → R1 (o mesmo padrão do R8). O log completo está em <code>Pratica/lab6_ospf/gabarito_log_comandos.txt</code>.</p>
+</details>
+
+<h3>O que esperar</h3>
+<ul>
+  <li><b>Dois caminhos de custo igual (ECMP).</b> De R1 até R7 há R1→R2→R7 e R1→R6→R7, ambos com custo 2. O OSPF instala os dois. No R1, a <code>192.168.1.16/30</code> aparece com duas linhas <code>via</code>, assim como as LANs do lado do R8:
+<pre><code><span class="hl">O IA</span>    192.168.1.16 [110/3] via 192.168.1.1, FastEthernet0/0
+                     [110/3] via 192.168.1.9, FastEthernet0/1
+<span class="ex">O E2</span>    10.0.3.0 [110/20] via 192.168.1.1, FastEthernet0/0
+                 [110/20] via 192.168.1.9, FastEthernet0/1</code></pre></li>
+  <li><b>Duas áreas.</b> A <code>192.168.1.16/30</code> é da área 1, então chega ao R1 como <code>O IA</code> (inter-área), pelo resumo que o R7 (ABR) manda para a área 0. O R8, que só está na área 1, vê os quatro <code>/30</code> do anel como <code>O IA</code>, com custo 2 ou 3, todos <code>via 192.168.1.17</code>. As LANs estáticas são <code>O E2 [110/20]</code> em todo lugar: o R1 e o R8 são ASBR, e a rota externa atravessa a fronteira das áreas.</li>
+  <li><b>R10 sem rota default.</b> No lugar dela, o gabarito tem <code>ip route 10.0.0.0 255.0.0.0</code> (todas as LANs <code>10.x</code>) e <code>ip route 192.168.1.0 255.255.255.0</code> (o anel), as duas para <code>10.0.3.1</code>. Nesta rede dá no mesmo; um destino fora desses dois blocos ficaria sem rota no R10.</li>
+  <li><b>Todos os 4 PCs se pingam.</b> O caminho mais longo é PC0 → PC3: PC0 → R9 → R1 → (R2 ou R6) → R7 → R8 → R10 → PC3, com 7 saltos no <code>tracert</code>: <code>10.0.1.1</code>, <code>10.0.2.1</code>, <code>192.168.1.1</code>, <code>192.168.1.5</code>, <code>192.168.1.18</code>, <code>10.0.3.2</code>, <code>10.0.4.2</code>.</li>
+  <li><b>Redundância:</b> <code>shutdown</code> na Fa0/0 do R2. Depois de alguns segundos, as rotas do R1 ficam só com <code>via 192.168.1.9</code> (a <code>192.168.1.4/30</code> passa a <code>[110/3]</code>), e os pings continuam funcionando (talvez com uma perda no meio). É o que faltava no cenário A (<a href="#exp2">experimento 2</a>).</li>
+</ul>
+<p class="cap">Previsões calculadas a partir da configuração do gabarito; não conferidas no Packet Tracer.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="cenario-c">
+<h2><span class="n">10</span>Cenário C: “Exercício 1” — triângulo <span class="chip ospf">gabarito</span></h2>
+<p>Três roteadores ligados dois a dois e uma LAN em cada um. Todos têm o módulo NM-2FE2W (Fa1/0 e Fa1/1). É o menor exemplo com <b>redundância</b>. O <b>gabarito</b> (montado em 21/10/2026) usa as redes das notas, tudo na <b>área 0</b>, e leva as LANs ao OSPF por <b><code>redistribute connected subnets</code></b> nos três roteadores. No ROTEADOR3 o professor chegou a pôr a LAN por <code>network 10.0.3.0 … area 0</code>, olhou as rotas e trocou pela redistribuição.</p>
+<div class="prop">
+  <p><b>Redes das notas</b> (rótulo <b>“Exercicio 1”</b>): enlaces <code>172.16.10.0/30</code> (R13–R12), <code>172.16.10.4/30</code> (R11–R13) e <code>172.16.10.8/30</code> (R11–R12); LANs <code>10.0.1.0/24</code> (R11), <code>10.0.2.0/24</code> (R13) e <code>10.0.3.0/24</code> (R12). <b>Hostnames no gabarito:</b> Router11 = <code>ROTEADOR1</code>, Router13 = <code>ROTEADOR2</code>, Router12 = <code>ROTEADOR3</code>.</p>
+</div>
+<figure>
+  <div class="fig"><svg id="svg-c" role="img" aria-label="Topologia do cenário C com o endereçamento do gabarito"></svg></div>
+</figure>
+<div class="tbl"><table>
+  <thead><tr><th>Enlace</th><th>Portas</th><th>Cabo</th><th>Rede</th><th>IPs (gabarito)</th></tr></thead>
+  <tbody>
+    <tr><td>R11 ↔ R13</td><td>R11 Fa0/1 · R13 Fa0/0</td><td>crossover</td><td><code>172.16.10.4/30</code></td><td>R11 .5 · R13 .6</td></tr>
+    <tr><td>R13 ↔ R12</td><td>R13 Fa0/1 · R12 Fa0/0</td><td>crossover</td><td><code>172.16.10.0/30</code></td><td>R13 .1 · R12 .2</td></tr>
+    <tr><td>R11 ↔ R12</td><td>R11 Fa1/0 · R12 Fa1/0</td><td>crossover</td><td><code>172.16.10.8/30</code></td><td>R11 .9 · R12 .10</td></tr>
+    <tr><td>LAN Switch7</td><td>R11 Fa0/0 → Fa0/2 · PC4 → Fa0/1</td><td>straight</td><td><code>10.0.1.0/24</code></td><td>R11 .1 · PC4 .2</td></tr>
+    <tr><td>LAN Switch8</td><td>R12 Fa0/1 → Fa0/1 · Laptop0 → Fa0/2</td><td>straight</td><td><code>10.0.3.0/24</code></td><td>R12 .1 · Laptop0 .2</td></tr>
+    <tr><td>LAN Switch9</td><td>R13 Fa1/0 → Fa0/2 · PC5 → Fa0/1</td><td>straight</td><td><code>10.0.2.0/24</code></td><td>R13 .1 · PC5 .2</td></tr>
+  </tbody>
+</table></div>
+
+<details>
+  <summary>Configuração dos 3 roteadores (como no gabarito)</summary>
+  <div class="grid2">
+<pre><code><span class="cm">! Router11 (hostname ROTEADOR1)</span>
+enable
+configure terminal
+hostname ROTEADOR1
+interface fastEthernet 0/0
+ ip address 10.0.1.1 255.255.255.0
+ no shutdown
+interface fastEthernet 0/1
+ ip address 172.16.10.5 255.255.255.252
+ no shutdown
+interface fastEthernet 1/0
+ ip address 172.16.10.9 255.255.255.252
+ no shutdown
+exit
+router ospf 1
+ network 172.16.10.4 0.0.0.3 area 0
+ network 172.16.10.8 0.0.0.3 area 0
+ redistribute connected subnets
+end
+write</code></pre>
+<pre><code><span class="cm">! Router12 (hostname ROTEADOR3)</span>
+enable
+configure terminal
+hostname ROTEADOR3
+interface fastEthernet 1/0
+ ip address 172.16.10.10 255.255.255.252
+ no shutdown
+interface fastEthernet 0/0
+ ip address 172.16.10.2 255.255.255.252
+ no shutdown
+interface fastEthernet 0/1
+ ip address 10.0.3.1 255.255.255.0
+ no shutdown
+exit
+router ospf 1
+ network 172.16.10.0 0.0.0.3 area 0
+ network 172.16.10.8 0.0.0.3 area 0
+ redistribute connected subnets
+end
+write</code></pre>
+<pre><code><span class="cm">! Router13 (hostname ROTEADOR2)</span>
+enable
+configure terminal
+hostname ROTEADOR2
+interface fastEthernet 0/0
+ ip address 172.16.10.6 255.255.255.252
+ no shutdown
+interface fastEthernet 0/1
+ ip address 172.16.10.1 255.255.255.252
+ no shutdown
+interface fastEthernet 1/0
+ ip address 10.0.2.1 255.255.255.0
+ no shutdown
+exit
+router ospf 1
+ network 172.16.10.0 0.0.0.3 area 0
+ network 172.16.10.4 0.0.0.3 area 0
+ redistribute connected subnets
+end
+write</code></pre>
+  </div>
+  <p class="cap">Alternativa sem redistribuição (a versão anterior deste guia): <code>network</code> também para a LAN e <code>passive-interface</code> nela. Aí as LANs aparecem como <code>O [110/2]</code>, com custo real, em vez de <code>O E2 [110/20]</code>. Atalho válido para os enlaces: <code>network 172.16.10.0 0.0.0.15 area 0</code> casa com os três <code>/30</code> de uma vez.</p>
+</details>
+
+<h3>O que esperar</h3>
+<ul>
+  <li>As LANs aparecem como <code>O E2</code>, com a métrica fixa 20. No R11: <code>O E2 10.0.3.0 [110/20] via 172.16.10.10</code> (direto pelo R12) e <code>O E2 10.0.2.0 [110/20] via 172.16.10.6</code> (direto pelo R13). Os três roteadores são ASBR.</li>
+  <li>O enlace do lado oposto, <code>172.16.10.0/30</code> (R13–R12), tem dois caminhos de custo 2 a partir do R11: aparece como <code>O [110/2]</code> com dois <code>via</code>.</li>
+  <li><b>Falha:</b> <code>shutdown</code> na Fa1/0 do R11 (no log, o professor derrubou a Fa1/0 do outro lado, no ROTEADOR3). A <code>10.0.3.0</code> continua <code>O E2 [110/20]</code>, agora <code>via 172.16.10.6</code>, dando a volta pelo R13: com rota externa tipo 2 o <b>número não muda</b>, só o caminho. Com a LAN por <code>network</code>, o custo passaria de <code>[110/2]</code> para <code>[110/3]</code>. O <code>tracert</code> de PC4 para o Laptop0 ganha um salto.</li>
+</ul>
+<p class="cap">Previsões calculadas a partir da configuração do gabarito; não conferidas no Packet Tracer.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="erros">
+<h2><span class="n">11</span>Erros comuns</h2>
+<div class="tbl"><table>
+  <thead><tr><th>Sintoma</th><th>Causa provável</th><th>Correção</th></tr></thead>
+  <tbody>
+    <tr><td>Ponto vermelho no cabo entre roteadores</td><td>cabo straight-through entre dois roteadores</td><td>usar <b>crossover</b>, como no arquivo</td></tr>
+    <tr><td>Interface <code>administratively down</code></td><td>roteador sobe com as interfaces em shutdown</td><td><code>no shutdown</code> em cada interface</td></tr>
+    <tr><td><code>show ip ospf neighbor</code> vazio</td><td><code>network</code> não casa com o IP da interface (wildcard ou rede errada); área diferente nas duas pontas; máscaras diferentes nas pontas</td><td>conferir <code>show ip ospf interface</code> nos dois lados</td></tr>
+    <tr><td>Vizinho cai 40 s depois de uma mudança</td><td>uma ponta parou de mandar Hellos (tirou o <code>network</code>, <code>passive-interface</code> no enlace)</td><td>conferir o <code>network</code> e se a interface é passiva</td></tr>
+    <tr><td>Rota da LAN não aparece nos outros roteadores</td><td>LAN nem em <code>network</code> nem redistribuída</td><td><code>network … area 0</code> ou <code>redistribute connected subnets</code></td></tr>
+    <tr><td><code>% Only classful networks will be redistributed</code></td><td><code>redistribute</code> sem <code>subnets</code></td><td>repetir o comando com <code>subnets</code></td></tr>
+    <tr><td>Ping de um PC para a LAN do R5 falha só na volta</td><td>roteador fora do OSPF sem rota de volta</td><td>rota default no R5 (<code>ip route 0.0.0.0 0.0.0.0 10.0.0.1</code>)</td></tr>
+    <tr><td>Tudo some depois de <code>reload</code></td><td>faltou <code>write</code> (R0 e R5 do arquivo estão assim)</td><td><code>write</code> ou <code>copy running-config startup-config</code></td></tr>
+    <tr><td>Rotas OSPF demoram a aparecer</td><td>vizinhança e eleição de DR levam até 40 s</td><td>esperar ou usar <b>Fast Forward Time</b></td></tr>
+    <tr><td>Primeira resposta do ping é <code>Request timed out</code></td><td>ARP resolvendo</td><td>repetir o ping</td></tr>
+  </tbody>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="cli">
+<h2><span class="n">12</span>Referência rápida da CLI</h2>
+<pre><code><span class="cm">! configuração</span>
+router ospf 1                              <span class="cm">! liga o processo (número local)</span>
+ network &lt;rede&gt; &lt;wildcard&gt; area 0           <span class="cm">! ativa OSPF nas interfaces que casam</span>
+ passive-interface fa0/0                   <span class="cm">! anuncia a rede, mas sem Hellos</span>
+ redistribute connected subnets            <span class="cm">! injeta redes conectadas (vira O E2)</span>
+ redistribute static subnets               <span class="cm">! injeta rotas estáticas</span>
+ router-id 1.1.1.1                         <span class="cm">! fixa o Router-ID (depois: clear ip ospf process)</span>
+ip route &lt;rede&gt; &lt;máscara&gt; &lt;próximo-salto&gt;    <span class="cm">! rota estática</span>
+ip route 0.0.0.0 0.0.0.0 &lt;próximo-salto&gt;     <span class="cm">! rota default</span>
+
+<span class="cm">! verificação</span>
+show ip route [ospf]
+show ip ospf neighbor
+show ip ospf interface [brief]
+show ip ospf database
+show ip protocols
+show ip interface brief
+
+<span class="cm">! wildcard = 255.255.255.255 − máscara</span>
+<span class="cm">!   /30 → 0.0.0.3    /29 → 0.0.0.7    /28 → 0.0.0.15    /24 → 0.0.0.255</span></code></pre>
+<p class="cap">Abreviações aceitas: <code>en</code>, <code>conf t</code>, <code>int fa0/0</code>, <code>no shut</code>, <code>sh ip ro</code>, <code>sh ip ospf nei</code>, <code>wr</code>. Para rodar um <code>show</code> dentro do modo de configuração, use <code>do show …</code>.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="fonte">
+<h2><span class="n">13</span>Como este guia foi feito</h2>
+<p>O <code>.pkt</code> é um XML compactado e cifrado. O script <code>Pratica/tools/pkt2xml.js</code> desfaz isso (embaralhamento, Twofish-EAX e zlib) e lista equipamentos, IPs, configurações, cabos e o log de comandos. Todos os IPs, portas, tipos de cabo, configurações e horários desta página vêm do arquivo. As posições do mapa também.</p>
+<pre><code>cd Pratica
+node tools/pkt2xml.js lab6_ospf/OSPF-2026-10-19.pkt                  <span class="cm"># resumo</span>
+node tools/pkt2xml.js lab6_ospf/OSPF-2026-10-19.pkt saida.xml        <span class="cm"># XML completo</span></code></pre>
+<p><b>Não verificado no Packet Tracer:</b> as tabelas de rotas, os vizinhos, os <code>tracert</code> e os resultados dos experimentos são <b>previsões</b> calculadas a partir das configurações. Nos cenários B e C, as redes e as áreas vêm das <b>notas do professor</b> no <code>.pkt</code> (o resumo do <code>pkt2xml.js</code> as lista em “Notas da área de trabalho”), e os IPs de cada porta e as configurações vêm do <b>gabarito</b> (<code>OSPF-2026-10-19-gabarito.pkt</code>, lido com o mesmo script). Se o Packet Tracer mostrar algo diferente, a divergência é o dado interessante: anote.</p>
+</section>
+
+<footer>Lab 6 · OSPF · gerado em 26/10/2026 a partir de <code>OSPF-2026-10-19.pkt</code> · Redes de Computadores, PUC-Campinas</footer>
+</div>
+
+<script id="pkt-data" type="application/json">{"devices":[{"name":"10.0.0.2/24","model":"PC-PT","x":252.5,"y":350},{"name":"10.0.1.2/24","model":"PC-PT","x":1278.5,"y":336},{"name":"Switch0","model":"2960-24TT","x":389,"y":348},{"name":"Power Distribution Device0","model":"Power Distribution Device","x":3897,"y":3900},{"name":"Switch1","model":"2960-24TT","x":1112,"y":339},{"name":"Router0","model":"2621XM","x":536.5,"y":347},{"name":"Router3","model":"2621XM","x":744.5,"y":343},{"name":"Router4","model":"2621XM","x":943.5,"y":347},{"name":"Router5","model":"2621XM","x":396.5,"y":165},{"name":"Switch2","model":"2960-24TT","x":262,"y":156},{"name":"10.0.2.2","model":"PC-PT","x":128.5,"y":142},{"name":"Router1","model":"2621XM","x":620.5,"y":986},{"name":"Router2","model":"2621XM","x":805.5,"y":872},{"name":"Router6","model":"2621XM","x":796.5,"y":1126},{"name":"Router7","model":"2621XM","x":979.5,"y":1018},{"name":"Router8","model":"2621XM","x":1160.5,"y":1016},{"name":"Switch3","model":"2950T-24","x":472,"y":984},{"name":"Switch4","model":"2950T-24","x":1324,"y":1020},{"name":"Router9","model":"2621XM","x":481.5,"y":848},{"name":"Power Distribution Device1","model":"Power Distribution Device","x":3899,"y":3900},{"name":"Router10","model":"2621XM","x":1467.5,"y":1018},{"name":"Switch5","model":"2950T-24","x":374,"y":776},{"name":"Switch6","model":"2950T-24","x":1622,"y":1013},{"name":"PC0","model":"PC-PT","x":224.5,"y":774},{"name":"PC1","model":"PC-PT","x":1326.5,"y":1129},{"name":"PC2","model":"PC-PT","x":356.5,"y":997},{"name":"PC3","model":"PC-PT","x":1784.5,"y":1012},{"name":"Router11","model":"2621XM","x":1894.5,"y":271},{"name":"Router12","model":"2621XM","x":2056.5,"y":346},{"name":"Router13","model":"2621XM","x":2051.5,"y":197},{"name":"Switch7","model":"2950T-24","x":1760,"y":277},{"name":"Switch8","model":"2950T-24","x":2058,"y":444},{"name":"Switch9","model":"2950T-24","x":2044,"y":127},{"name":"PC4","model":"PC-PT","x":1639.5,"y":271},{"name":"Laptop0","model":"Laptop-PT","x":2181.5,"y":444},{"name":"PC5","model":"PC-PT","x":2044.5,"y":56}],"links":[{"from":"Router0","to":"Router3","cable":"eCrossOver"},{"from":"Router3","to":"Router4","cable":"eCrossOver"},{"from":"Router4","to":"Switch1","cable":"eStraightThrough"},{"from":"Switch1","to":"10.0.1.2/24","cable":"eStraightThrough"},{"from":"Switch0","to":"Router0","cable":"eStraightThrough"},{"from":"10.0.0.2/24","to":"Switch0","cable":"eStraightThrough"},{"from":"10.0.2.2","to":"Switch2","cable":"eStraightThrough"},{"from":"Switch2","to":"Router5","cable":"eStraightThrough"},{"from":"Router5","to":"Switch0","cable":"eStraightThrough"},{"from":"Router1","to":"Router2","cable":"eCrossOver"},{"from":"Router2","to":"Router7","cable":"eCrossOver"},{"from":"Router1","to":"Router6","cable":"eCrossOver"},{"from":"Router6","to":"Router7","cable":"eCrossOver"},{"from":"Router7","to":"Router8","cable":"eCrossOver"},{"from":"Switch4","to":"Router8","cable":"eStraightThrough"},{"from":"Switch3","to":"Router1","cable":"eStraightThrough"},{"from":"Switch5","to":"Router9","cable":"eStraightThrough"},{"from":"Router9","to":"Switch3","cable":"eStraightThrough"},{"from":"Switch4","to":"Router10","cable":"eStraightThrough"},{"from":"Switch6","to":"Router10","cable":"eStraightThrough"},{"from":"PC0","to":"Switch5","cable":"eStraightThrough"},{"from":"PC2","to":"Switch3","cable":"eStraightThrough"},{"from":"Switch4","to":"PC1","cable":"eStraightThrough"},{"from":"Switch6","to":"PC3","cable":"eStraightThrough"},{"from":"PC4","to":"Switch7","cable":"eStraightThrough"},{"from":"Switch7","to":"Router11","cable":"eStraightThrough"},{"from":"Router11","to":"Router13","cable":"eCrossOver"},{"from":"Router13","to":"Router12","cable":"eCrossOver"},{"from":"Router12","to":"Switch8","cable":"eStraightThrough"},{"from":"Switch8","to":"Laptop0","cable":"eStraightThrough"},{"from":"PC5","to":"Switch9","cable":"eStraightThrough"},{"from":"Router11","to":"Router12","cable":"eCrossOver"},{"from":"Router13","to":"Switch9","cable":"eStraightThrough"}]}</script>
+<script>
+(function(){
+  'use strict';
+  /* ---------- tema ---------- */
+  var root = document.documentElement;
+  try { var t = localStorage.getItem('lab6-theme'); if (t) root.setAttribute('data-theme', t); } catch (e) {}
+  document.getElementById('theme').addEventListener('click', function(){
+    var dark = root.getAttribute('data-theme') ? root.getAttribute('data-theme') === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('lab6-theme', next); } catch (e) {}
+  });
+
+  /* ---------- botão copiar ---------- */
+  document.querySelectorAll('pre').forEach(function(pre){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'copy'; b.textContent = 'copiar';
+    b.addEventListener('click', function(){
+      /* copia só o que se digita: sem comentários e sem o prompt (router0#, router0(config)#, C:\>) */
+      var code = pre.querySelector('code').cloneNode(true);
+      code.querySelectorAll('.cm').forEach(function(c){ c.remove(); });
+      var txt = code.textContent.split('\n').map(function(l){
+        return l.replace(/^\S+[#>]\s?/, '').replace(/\s+$/, '');
+      }).filter(function(l, i, arr){ return l || (i > 0 && arr[i - 1]); }).join('\n').replace(/\s+$/, '');
+      var done = function(){ b.textContent = 'copiado'; setTimeout(function(){ b.textContent = 'copiar'; }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+      function fallback(){ var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove(); }
+    });
+    pre.appendChild(b);
+  });
+
+  /* ---------- desenho de topologias ---------- */
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, parent, text){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  /* tamanhos-base (unidades do viewBox); cada diagrama multiplica por spec.fs */
+  var SIZE = {'d-lab': 17, 'd-sub': 14, 't-net': 14, 't-port': 13, 'reg-t': 14};
+  var FS = 1;
+  function fsz(cls){ return 'font-size:' + (SIZE[cls] * FS).toFixed(1) + 'px'; }
+  function multiText(parent, x, y, str, cls, anchor){
+    var lines = String(str).split('\n'), lh = 16 * FS;
+    var t = el('text', {x: x, y: y - (lines.length - 1) * lh / 2, 'class': cls, style: fsz(cls), 'text-anchor': anchor || 'middle', 'dominant-baseline': 'middle'}, parent);
+    lines.forEach(function(s, i){ el('tspan', {x: x, dy: i ? lh : 0}, t, s); });
+    return t;
+  }
+  function drawDev(g, d, s){
+    var G = el('g', {'class': 'dev ' + d.type + (d.off ? ' off' : ''), transform: 'translate(' + d.x + ',' + d.y + ')'}, g);
+    if (d.type === 'router'){
+      el('circle', {r: 26 * s}, G);
+      var a = 11 * s, h = 5 * s;
+      el('path', {'class': 'ico', d: 'M' + (-a) + ',' + (-h) + 'H' + a + 'l' + (-h) + ',' + (-h) + 'M' + a + ',' + h + 'H' + (-a) + 'l' + h + ',' + h}, G);
+    } else if (d.type === 'switch'){
+      el('rect', {x: -30 * s, y: -16 * s, width: 60 * s, height: 32 * s, rx: 6 * s}, G);
+      var w = 16 * s, v = 5 * s;
+      el('path', {'class': 'ico', d: 'M' + (-w) + ',' + (-v) + 'H' + w + 'M' + w + ',' + v + 'H' + (-w)}, G);
+    } else {
+      el('rect', {x: -20 * s, y: -17 * s, width: 40 * s, height: 27 * s, rx: 3 * s}, G);
+      el('path', {'class': 'ico', d: 'M' + (-11 * s) + ',' + (17 * s) + 'H' + (11 * s) + 'M0,' + (10 * s) + 'V' + (17 * s)}, G);
+    }
+    var lp = d.lp || 'down', lines = [d.label].concat(d.sub ? [d.sub] : []);
+    var lh = 18 * FS, off = (d.type === 'router' ? 30 : 26) * s + 16 * FS, x = 0, y = 0, anchor = 'middle';
+    if (lp === 'down') y = off;
+    else if (lp === 'up') y = -off - (lines.length - 1) * lh;
+    else if (lp === 'right'){ x = (d.type === 'router' ? 34 : 38) * s; anchor = 'start'; y = -(lines.length - 1) * lh / 2; }
+    else if (lp === 'left'){ x = -(d.type === 'router' ? 34 : 38) * s; anchor = 'end'; y = -(lines.length - 1) * lh / 2; }
+    lines.forEach(function(s2, i){
+      var cls = i ? 'd-sub' : 'd-lab';
+      el('text', {x: x, y: y + i * lh, 'class': cls, style: fsz(cls), 'text-anchor': anchor, 'dominant-baseline': 'middle'}, G, s2);
+    });
+  }
+  function drawTopo(svg, spec){
+    svg.setAttribute('viewBox', spec.vb.join(' '));
+    FS = spec.fs || 1;
+    var gR = el('g', {}, svg), gL = el('g', {}, svg), gP = el('g', {}, svg), gD = el('g', {}, svg), gT = el('g', {}, svg);
+    (spec.regions || []).forEach(function(r){
+      el('rect', {x: r.x, y: r.y, width: r.w, height: r.h, rx: 14, 'class': 'reg ' + (r.cls || '')}, gR);
+      el('text', {x: r.lx != null ? r.lx : r.x + 12, y: r.ly != null ? r.ly : r.y + 22, 'class': 'reg-t ' + (r.cls || ''), style: 'font-size:' + (14 * FS * (r.big || 1)).toFixed(1) + 'px'}, gR, r.label);
+    });
+    var D = {};
+    spec.devices.forEach(function(d){ D[d.id] = d; });
+    spec.links.forEach(function(l){
+      var a = D[l.a], b = D[l.b];
+      el('line', {x1: a.x, y1: a.y, x2: b.x, y2: b.y, 'class': 'lk' + (l.cross ? ' cross' : '')}, gL);
+      var dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+      var nx = -uy, ny = ux;
+      if (ny > 0 || (ny === 0 && nx > 0)){ nx = -nx; ny = -ny; }   /* normal "para cima" (ou para a esquerda) */
+      function put(txt, frac, off, cls){
+        if (!txt) return;
+        var px = a.x + dx * frac + nx * off, py = a.y + dy * frac + ny * off, anchor = 'middle';
+        if (Math.abs(ux) < 0.35) anchor = (nx * off < 0) ? 'end' : 'start';
+        if (Math.abs(ux) < 0.35 && nx * off === 0) anchor = 'middle';
+        multiText(gT, px, py, txt, cls, anchor);
+      }
+      put(l.net, l.nF != null ? l.nF : 0.5, l.nOff != null ? l.nOff : 18, 't-net');
+      put(l.aL, l.aF != null ? l.aF : 0.24, l.aOff != null ? l.aOff : -22, 't-port');
+      put(l.bL, l.bF != null ? l.bF : 0.76, l.bOff != null ? l.bOff : -22, 't-port');
+    });
+    spec.devices.forEach(function(d){ drawDev(gD, d, spec.scale || 1); });
+    return {gP: gP, D: D};
+  }
+
+  /* ---------- cenário A ---------- */
+  var A = drawTopo(document.getElementById('svg-a'), {
+    vb: [20, 30, 1370, 400], fs: 1.25,
+    regions: [{x: 550, y: 232, w: 540, h: 190, label: 'OSPF 1 · área 0', lx: 752, ly: 258}],
+    devices: [
+      {id: 'pcC', type: 'pc', label: '10.0.2.2', sub: 'gw 10.0.2.1', x: 80, y: 110},
+      {id: 'sw2', type: 'switch', label: 'Switch2', sub: '10.0.2.0/24', x: 240, y: 110},
+      {id: 'r5', type: 'router', label: 'R5', sub: 'sem OSPF', x: 420, y: 110, lp: 'right'},
+      {id: 'pcA', type: 'pc', label: '10.0.0.2', sub: 'gw 10.0.0.1', x: 240, y: 320},
+      {id: 'sw0', type: 'switch', label: 'Switch0', sub: '10.0.0.0/24', x: 420, y: 320},
+      {id: 'r0', type: 'router', label: 'R0', sub: 'ASBR', x: 600, y: 320},
+      {id: 'r3', type: 'router', label: 'R3', x: 820, y: 320},
+      {id: 'r4', type: 'router', label: 'R4', sub: 'ASBR', x: 1040, y: 320},
+      {id: 'sw1', type: 'switch', label: 'Switch1', sub: '10.0.1.0/24', x: 1200, y: 320},
+      {id: 'pcB', type: 'pc', label: '10.0.1.2', sub: 'gw 10.0.1.1', x: 1330, y: 320}
+    ],
+    links: [
+      {a: 'pcC', b: 'sw2', bL: 'Fa0/1', bF: .7, bOff: 16},
+      {a: 'sw2', b: 'r5', aL: 'Fa0/2', aF: .3, aOff: 16, bL: 'Fa0/0 .1', bF: .64},
+      {a: 'r5', b: 'sw0', aL: 'Fa0/1 .3', aF: .3, aOff: 12, bL: 'Fa0/3', bF: .8, bOff: 12},
+      {a: 'pcA', b: 'sw0', bL: 'Fa0/2', bF: .7, bOff: 16},
+      {a: 'sw0', b: 'r0', aL: 'Fa0/1', aF: .3, aOff: 16, bL: 'Fa0/1 .1', bF: .62},
+      {a: 'r0', b: 'r3', cross: true, net: '192.168.0.0/30', nOff: 20, aL: 'Fa0/0 .1', aF: .3, bL: 'Fa0/1 .2', bF: .7},
+      {a: 'r3', b: 'r4', cross: true, net: '192.168.0.4/30', nOff: 20, aL: 'Fa0/0 .5', aF: .3, bL: 'Fa0/1 .6', bF: .7},
+      {a: 'r4', b: 'sw1', aL: 'Fa0/0 .1', aF: .38, bL: 'Fa0/1', bF: .8, bOff: 16},
+      {a: 'sw1', b: 'pcB', aL: 'Fa0/2', aF: .3, aOff: 16}
+    ]
+  });
+  var PATHS = {
+    ab: {pts: [['pcA'], ['sw0'], ['r0'], ['r3'], ['r4'], ['sw1'], ['pcB']],
+         info: '<b>4 saltos de IP:</b> PC → R0 (gateway) → R3 → R4 → PC. Todo o trecho entre roteadores usa rotas OSPF; a LAN de destino chega ao R0 como <code>O E2</code>.'},
+    ac: {pts: [['pcA', 0, -6], ['sw0', 0, -6], ['r0', 0, -6], ['r0', 0, 7], ['sw0', 7, 7], ['r5', 7, 0], ['sw2', 0, 7], ['pcC', 0, 7]],
+         info: '<b>Ida, 3 saltos:</b> PC → R0 (é o gateway do PC) → <b>volta pela mesma interface</b> ao R5 (rota estática <code>10.0.2.0/24 via 10.0.0.3</code>) → PC. O quadro atravessa o Switch0 duas vezes.'},
+    ca: {pts: [['pcC', 0, -7], ['sw2', 0, -7], ['r5', -7, -7], ['sw0', -7, -7], ['pcA', 0, -7]], back: true,
+         info: '<b>Volta, 2 saltos:</b> PC → R5 (gateway) → PC. O R5 tem a 10.0.0.0/24 conectada e entrega direto, <b>sem passar pelo R0</b>. Ida e volta seguem caminhos diferentes: caminho assimétrico.'},
+    bc: {pts: [['pcB'], ['sw1'], ['r4'], ['r3'], ['r0'], ['sw0'], ['r5'], ['sw2'], ['pcC']],
+         info: '<b>5 saltos:</b> PC → R4 → R3 → R0 (a rota <code>O E2 10.0.2.0</code> leva ao ASBR que redistribuiu a estática) → R5 → PC. Na volta, o R5 usa a <b>rota default</b> para o R0, e o OSPF leva até o R4.'}
+  };
+  var pathEl = null, info = document.getElementById('path-info');
+  document.querySelectorAll('.pbtns button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.pbtns button').forEach(function(x){ x.setAttribute('aria-pressed', x === btn ? 'true' : 'false'); });
+      if (pathEl){ pathEl.remove(); pathEl = null; }
+      var p = PATHS[btn.dataset.path];
+      if (!p){ info.textContent = 'Clique num ping para ver por onde o pacote passa.'; return; }
+      var pts = p.pts.map(function(q){ var d = A.D[q[0]]; return (d.x + (q[1] || 0)) + ',' + (d.y + (q[2] || 0)); }).join(' ');
+      pathEl = el('polyline', {points: pts, 'class': 'path' + (p.back ? ' back' : '')}, A.gP);
+      info.innerHTML = p.info;
+    });
+  });
+
+  /* ---------- cenário B (gabarito) ---------- */
+  drawTopo(document.getElementById('svg-b'), {
+    vb: [130, 690, 1960, 570], fs: 1.6,
+    regions: [{x: 548, y: 775, w: 590, h: 470, label: 'OSPF 1 · área 0', lx: 800, ly: 1228},
+              {x: 1030, y: 945, w: 290, h: 135, cls: 'a1', label: 'área 1', lx: 1238, ly: 972}],
+    devices: [
+      {id: 'pc0', type: 'pc', label: 'PC0', sub: '10.0.1.2', x: 180, y: 760},
+      {id: 'sw5', type: 'switch', label: 'Switch5', sub: '10.0.1.0/24', x: 350, y: 760, lp: 'right'},
+      {id: 'r9', type: 'router', label: 'R9', sub: 'sem OSPF', x: 350, y: 885, lp: 'right'},
+      {id: 'pc2', type: 'pc', label: 'PC2', sub: '10.0.2.3', x: 180, y: 1010},
+      {id: 'sw3', type: 'switch', label: 'Switch3', sub: '10.0.2.0/24', x: 350, y: 1010},
+      {id: 'r1', type: 'router', label: 'R1', sub: 'ASBR', x: 580, y: 1010},
+      {id: 'r2', type: 'router', label: 'R2', x: 820, y: 850, lp: 'up'},
+      {id: 'r6', type: 'router', label: 'R6', x: 820, y: 1170, lp: 'right'},
+      {id: 'r7', type: 'router', label: 'R7', sub: 'ABR', x: 1060, y: 1010},
+      {id: 'r8', type: 'router', label: 'R8', sub: 'ASBR', x: 1280, y: 1010},
+      {id: 'sw4', type: 'switch', label: 'Switch4', sub: '10.0.3.0/24', x: 1480, y: 1010, lp: 'up'},
+      {id: 'pc1', type: 'pc', label: 'PC1', sub: '10.0.3.3', x: 1480, y: 1160, lp: 'right'},
+      {id: 'r10', type: 'router', label: 'R10', sub: 'sem OSPF', x: 1680, y: 1010},
+      {id: 'sw6', type: 'switch', label: 'Switch6', sub: '10.0.4.0/24', x: 1860, y: 1010, lp: 'up'},
+      {id: 'pc3', type: 'pc', label: 'PC3', sub: '10.0.4.2', x: 2020, y: 1010}
+    ],
+    links: [
+      {a: 'pc0', b: 'sw5'},
+      {a: 'sw5', b: 'r9', bL: '.1', bF: .66, bOff: 14},
+      {a: 'r9', b: 'sw3', aL: '.2', aF: .34, aOff: 14},
+      {a: 'pc2', b: 'sw3'},
+      {a: 'sw3', b: 'r1', bL: '.1', bF: .74, bOff: -24},
+      {a: 'r1', b: 'r2', cross: true, net: '.0/30', nOff: 26, aL: '.2', aF: .27, aOff: -24, bL: '.1', bF: .73, bOff: -24},
+      {a: 'r2', b: 'r7', cross: true, net: '.4/30', nOff: 26, aL: '.6', aF: .27, aOff: -24, bL: '.5', bF: .73, bOff: -24},
+      {a: 'r1', b: 'r6', cross: true, net: '.8/30', nOff: -28, aL: '.10', aF: .27, aOff: 24, bL: '.9', bF: .73, bOff: 24},
+      {a: 'r6', b: 'r7', cross: true, net: '.12/30', nOff: -28, aL: '.14', aF: .27, aOff: 24, bL: '.13', bF: .73, bOff: 24},
+      {a: 'r7', b: 'r8', cross: true, net: '.16/30', nOff: 24, aL: '.17', aF: .25, aOff: -24, bL: '.18', bF: .75, bOff: -24},
+      {a: 'r8', b: 'sw4', aL: '.1', aF: .28, aOff: -24},
+      {a: 'sw4', b: 'pc1'},
+      {a: 'sw4', b: 'r10', bL: '.2', bF: .74, bOff: -24},
+      {a: 'r10', b: 'sw6', aL: '.1', aF: .28, aOff: -24},
+      {a: 'sw6', b: 'pc3'}
+    ]
+  });
+
+  /* ---------- cenário C (gabarito) ---------- */
+  drawTopo(document.getElementById('svg-c'), {
+    vb: [0, 60, 980, 480],
+    regions: [{x: 290, y: 100, w: 440, h: 420, label: 'OSPF 1 · área 0', lx: 300, ly: 500}],
+    devices: [
+      {id: 'pc4', type: 'pc', label: 'PC4', sub: '10.0.1.2', x: 60, y: 300},
+      {id: 'sw7', type: 'switch', label: 'Switch7', sub: '10.0.1.0/24', x: 190, y: 300},
+      {id: 'r11', type: 'router', label: 'R11', x: 340, y: 300},
+      {id: 'r13', type: 'router', label: 'R13', x: 590, y: 160, lp: 'up'},
+      {id: 'r12', type: 'router', label: 'R12', x: 590, y: 430},
+      {id: 'sw9', type: 'switch', label: 'Switch9', sub: '10.0.2.0/24', x: 770, y: 160, lp: 'up'},
+      {id: 'pc5', type: 'pc', label: 'PC5', sub: '10.0.2.2', x: 910, y: 160},
+      {id: 'sw8', type: 'switch', label: 'Switch8', sub: '10.0.3.0/24', x: 770, y: 430},
+      {id: 'lap', type: 'pc', label: 'Laptop0', sub: '10.0.3.2', x: 910, y: 430}
+    ],
+    links: [
+      {a: 'pc4', b: 'sw7'},
+      {a: 'sw7', b: 'r11', bL: 'Fa0/0 .1', bF: .6},
+      {a: 'r11', b: 'r13', cross: true, net: '172.16.10.4/30', nOff: 30, aL: 'Fa0/1 .5', aF: .27, aOff: -24, bL: 'Fa0/0 .6', bF: .7, bOff: -24},
+      {a: 'r13', b: 'r12', cross: true, net: '172.16.10.0/30', nOff: -16, aL: 'Fa0/1 .1', aF: .24, aOff: -12, bL: 'Fa0/0 .2', bF: .72, bOff: -12},
+      {a: 'r11', b: 'r12', cross: true, net: '172.16.10.8/30', nOff: -30, aL: 'Fa1/0 .9', aF: .27, aOff: 24, bL: 'Fa1/0 .10', bF: .7, bOff: 24},
+      {a: 'r13', b: 'sw9', aL: 'Fa1/0 .1', aF: .5, aOff: -22},
+      {a: 'sw9', b: 'pc5'},
+      {a: 'r12', b: 'sw8', aL: 'Fa0/1 .1', aF: .5, aOff: -22},
+      {a: 'sw8', b: 'lap'}
+    ]
+  });
+
+  /* ---------- mapa geral (dados do .pkt) ---------- */
+  var data = null;
+  try { data = JSON.parse(document.getElementById('pkt-data').textContent); } catch (e) {}
+  if (data){
+    var short = function(n){ return n.replace(/^Router/, 'R').replace(/^Switch/, 'SW').replace(/\/24$/, ''); };
+    var typeOf = function(m){ return /2621|2811|1941|ISR/.test(m) ? 'router' : /29[56]0/.test(m) ? 'switch' : 'pc'; };
+    var configured = {'Router0': 1, 'Router3': 1, 'Router4': 1, 'Router5': 1, '10.0.0.2/24': 1, '10.0.1.2/24': 1, '10.0.2.2': 1};
+    var devs = data.devices.filter(function(d){ return d.x < 3000; }).map(function(d){
+      var t = typeOf(d.model), lp = 'down';
+      if (d.x > 1990 && d.x < 2100 && d.y < 400) lp = 'right';
+      if (d.name === 'Router11') lp = 'up';
+      return {id: d.name, type: t, label: short(d.name), x: d.x, y: d.y, lp: lp, off: t !== 'switch' && !configured[d.name]};
+    });
+    var links = data.links.map(function(l){ return {a: l.from, b: l.to, cross: l.cable === 'eCrossOver'}; });
+    drawTopo(document.getElementById('svg-overview'), {
+      vb: [60, 0, 2240, 1215], scale: 1.25, fs: 1.45,
+      regions: [
+        {x: 80, y: 75, w: 1290, h: 350, cls: 'scen', big: 1.25, label: 'A · configurado', lx: 96, ly: 112},
+        {x: 170, y: 715, w: 1700, h: 485, cls: 'scen', big: 1.25, label: 'B · só cabos', lx: 186, ly: 1180},
+        {x: 1580, y: 15, w: 710, h: 500, cls: 'scen', big: 1.25, label: 'C · só cabos', lx: 1596, ly: 495}
+      ],
+      devices: devs, links: links
+    });
+  }
+})();
+</script>
+</body>
+</html>

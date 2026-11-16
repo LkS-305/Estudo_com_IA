@@ -1,0 +1,1719 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia da prova prática</title>
+<style>
+:root{
+  --bg:#0f1216; --bg2:#151a20; --card:#1a2028; --card2:#202833; --line:#2c3644;
+  --tx:#e3e8ee; --tx2:#a9b4c1; --tx3:#7b8794;
+  --acc:#6cb6ff; --acc2:#3d7cc4; --ok:#5fd38a; --warn:#f2c14e; --bad:#ff7b72; --vio:#c39bff;
+  --code:#0b0e12; --codetx:#d6e2ee; --cmt:#7f9a6e; --ph:#f2c14e;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}
+code,pre,kbd{font-family:ui-monospace,"Cascadia Code",Consolas,"Courier New",monospace}
+code{background:var(--card2);padding:.05em .35em;border-radius:4px;font-size:.92em;color:var(--codetx)}
+kbd{background:var(--card2);border:1px solid var(--line);border-bottom-width:2px;padding:0 .35em;border-radius:4px;font-size:.88em}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+nav.toc{position:sticky;top:0;height:100vh;overflow:auto;background:var(--bg2);border-right:1px solid var(--line);padding:18px 14px 40px}
+nav.toc h1{font-size:1.05rem;margin:0 0 4px}
+nav.toc .sub{color:var(--tx3);font-size:.8rem;margin-bottom:14px}
+nav.toc a{display:flex;gap:8px;align-items:baseline;color:var(--tx2);text-decoration:none;padding:4px 8px;border-radius:6px;font-size:.9rem}
+nav.toc a:hover{background:var(--card);color:var(--tx)}
+nav.toc a.on{background:var(--card2);color:var(--tx)}
+nav.toc .grp{color:var(--tx3);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin:14px 8px 4px}
+nav.toc .done::after{content:"✔";color:var(--ok);margin-left:auto;font-size:.8rem}
+main{padding:28px clamp(16px,4vw,56px) 80px;max-width:1060px}
+section{margin:0 0 56px;scroll-margin-top:16px}
+h2{font-size:1.55rem;margin:0 0 6px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+h2 .n{color:var(--acc);font-variant-numeric:tabular-nums}
+h3{font-size:1.15rem;margin:28px 0 8px;color:var(--tx)}
+h4{font-size:1rem;margin:18px 0 6px;color:var(--tx2)}
+.lead{color:var(--tx2);margin-top:0}
+.muted{color:var(--tx3)}
+.copy{display:inline-block;font-size:.72rem;font-weight:600;background:#2b2412;color:var(--warn);border:1px solid #5a4a1c;border-radius:999px;padding:1px 9px;vertical-align:middle;letter-spacing:.02em}
+.copy.opt{background:#1b2230;color:var(--tx2);border-color:var(--line)}
+.fora{display:inline-block;font-size:.72rem;font-weight:600;background:#2a1a1a;color:var(--bad);border:1px solid #5c2b2b;border-radius:999px;padding:1px 9px;vertical-align:middle}
+.prof{display:inline-block;font-size:.72rem;font-weight:600;background:#14261b;color:var(--ok);border:1px solid #275c3a;border-radius:999px;padding:1px 9px;vertical-align:middle}
+label.chk{margin-left:auto;font-size:.8rem;color:var(--tx3);font-weight:400;display:flex;gap:6px;align-items:center;cursor:pointer}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+.box.warn{border-left:4px solid var(--warn)}
+.box.bad{border-left:4px solid var(--bad)}
+.box.ok{border-left:4px solid var(--ok)}
+.box.info{border-left:4px solid var(--acc)}
+.box h4{margin-top:0;color:var(--tx)}
+pre.cli{background:var(--code);color:var(--codetx);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.88rem;line-height:1.45;margin:10px 0}
+pre.cli .c{color:var(--cmt);font-style:italic}
+pre.cli .ph{color:var(--ph)}
+pre.cli .dev{color:var(--vio);font-weight:700}
+.tw{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--card2);color:var(--tx);font-weight:600}
+td{background:var(--card)}
+td.y{color:var(--ok);text-align:center;font-weight:700}
+td.x{color:var(--tx3);text-align:center}
+td.blank{height:30px}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.flow a{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--tx)}
+.flow a:hover{border-color:var(--acc2)}
+.flow b{display:block;color:var(--acc);font-size:.8rem}
+.flow span{font-size:.86rem;color:var(--tx2)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.cols>.box{margin:0}
+ol.steps>li{margin:6px 0}
+ul.tight li,ol.tight li{margin:2px 0}
+.topo{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;font-size:.82rem;line-height:1.3;color:var(--codetx)}
+.tag{display:inline-block;font-size:.72rem;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--tx2);margin-left:4px}
+.tag.prev{color:var(--warn);border-color:#5a4a1c}
+table.ex td:nth-child(1){white-space:nowrap;color:var(--vio);font-family:ui-monospace,Consolas,monospace;font-size:.82rem}
+table.ex td:nth-child(2){white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:.85rem;color:var(--codetx)}
+table.ex tr.sep td{background:var(--card2);color:var(--tx);font-family:inherit;font-weight:600;white-space:normal}
+.modes{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;font-size:.85rem;line-height:1.5;color:var(--codetx)}
+.burger{display:none}
+footer{color:var(--tx3);font-size:.8rem;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav.toc{position:fixed;inset:0 auto 0 0;width:min(300px,85vw);transform:translateX(-100%);transition:transform .2s;z-index:20}
+  nav.toc.open{transform:none}
+  .burger{display:block;position:fixed;right:14px;bottom:14px;z-index:30;background:var(--acc2);color:#fff;border:0;border-radius:999px;padding:10px 16px;font:600 .9rem system-ui}
+  .flow{grid-template-columns:1fr 1fr}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  main{padding:20px 16px 80px}
+  h2{font-size:1.3rem}
+}
+@media print{
+  :root{--bg:#fff;--bg2:#fff;--card:#fff;--card2:#eee;--line:#999;--tx:#000;--tx2:#222;--tx3:#444;--code:#f4f4f4;--codetx:#000;--cmt:#555;--ph:#7a4d00;--acc:#003c8f}
+  nav.toc,.burger,label.chk{display:none}
+  .layout{display:block}
+  pre.cli,.box,table{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<button class="burger" id="burger" aria-label="Abrir sumário">☰ Sumário</button>
+<div class="layout">
+<nav class="toc" id="toc">
+  <h1>Guia da prova prática</h1>
+  <div class="sub">Redes · P1 prática · do jeito dos gabaritos dos Labs 6 e 7</div>
+  <div class="grp">Antes de tudo</div>
+  <a href="#uso">0 · Como usar e o que copiar</a>
+  <a href="#regras">1 · Regras desta prova</a>
+  <a href="#estilo">2 · Como o professor digita</a>
+  <a href="#explica">2b · Cada comando explicado</a>
+  <a href="#fases">3 · As fases e a ordem dele</a>
+  <div class="grp">Metodologia</div>
+  <a href="#f1">F1 · Ler e inventariar</a>
+  <a href="#f2">F2 · Desenhar e contar redes</a>
+  <a href="#f3">F3 · Endereçar</a>
+  <a href="#f4">F4 · Planejar o roteamento</a>
+  <a href="#f5">F5 · Switches</a>
+  <a href="#f6">F6 · Interfaces e hosts</a>
+  <a href="#f7">F7 · OSPF e estáticas</a>
+  <a href="#f8">F8 · Verificar e salvar</a>
+  <div class="grp">Teste do professor</div>
+  <a href="#ping">Matriz de ping entre VLANs</a>
+  <a href="#diag">Diagnóstico: sintoma → causa</a>
+  <div class="grp">Gabaritos passo a passo</div>
+  <a href="#provas">Provas 2025 · A e B (serial + parceiro)</a>
+  <a href="#lab7">Lab 7 · VLAN + STP + OSPF 4 áreas</a>
+  <a href="#lab6">Lab 6 · OSPF + estáticas</a>
+  <div class="grp">Referência</div>
+  <a href="#fora">O que NÃO está nos gabaritos</a>
+  <a href="#resumo">Folha-resumo</a>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<section id="uso">
+<h2><span class="n">0</span> Como usar este guia e o que levar escrito</h2>
+<p class="lead">A prova é uma configuração completa no Packet Tracer, parecida com os Labs 6 e 7. O professor confere de dois jeitos: <b>pinga de uma VLAN para outra (tudo tem de responder)</b> e <b>lê o log de comandos</b>. Este guia reproduz <b>exatamente a forma como ele configurou nos gabaritos</b> (<code>lab7/Exercicio - 2026-11-09-gabarito.pkt</code> e <code>lab6_ospf/OSPF-2026-10-19-gabarito.pkt</code>): os mesmos comandos, as mesmas abreviações, a mesma ordem.</p>
+
+<div class="box info">
+<h4>Ordem sugerida das folhas</h4>
+<ol class="steps">
+<li><b>Folha-resumo</b> (<a href="#resumo">última seção</a>). Se só der tempo de copiar uma coisa, é ela.</li>
+<li><b>Como o professor digita</b> (<a href="#estilo">seção 2</a>): as abreviações e os comandos dele.</li>
+<li><b>Provas práticas de 2025 (A e B)</b> (<a href="#provas">seção P</a>) — a prova real do ano passado: VLANs + EtherChannel + OSPF área 0, enlace <b>serial</b> e um <b>roteador de parceiros</b> com rota estática.</li>
+<li><b>Gabarito do Lab 7 passo a passo</b> — é o formato mais parecido com o que ele anunciou (VLANs + EtherChannel + STP + OSPF por área).</li>
+<li><b>Gabarito do Lab 6</b> — OSPF em várias áreas com roteadores estáticos.</li>
+<li><b>Tabelas</b>: máscaras, blocos /30, códigos da tabela de rotas, matriz de ping e diagnóstico.</li>
+<li><b>Folhas em branco</b> com as tabelas-modelo (inventário, endereçamento, plano por roteador e por switch, matriz de ping).</li>
+</ol>
+</div>
+<p class="muted">Etiquetas: <span class="prof">jeito do professor</span> = está no gabarito · <span class="fora">fora do gabarito</span> = não aparece nos logs dele (só reserva) · <span class="copy">✍ copiar</span> = essencial. Em <span style="color:var(--ph)">«amarelo»</span> nos comandos estão os valores que mudam na prova.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="regras">
+<h2><span class="n">1</span> Regras desta prova <span class="copy">✍ copiar</span></h2>
+<div class="cols">
+<div class="box bad">
+<h4>⛔ Tudo pela CLI</h4>
+<ul class="tight">
+<li>Roteador e switch: só a aba <b>CLI</b>. <b>Nunca</b> a aba <b>Config</b>.</li>
+<li>O <code>.pkt</code> grava cada comando com hora e equipamento — é o log que o professor lê. Erro de digitação fica no log; não tem problema (o gabarito dele tem vários: <code>e na</code>, <code>wqr</code>, <code>enas</code>). Corrija com <code>no …</code> e siga.</li>
+<li><b>Hosts:</b> no gabarito, o professor configurou PCs e laptops em <b>Desktop → IP Configuration</b>; essa janela não entra no log. Se ele exigir linha de comando também nos hosts, o equivalente é <b>Desktop → Command Prompt</b>: <code>ipconfig «IP» «máscara» «gateway»</code>. <i>Pergunte no início da prova.</i></li>
+</ul>
+</div>
+<div class="box ok">
+<h4>✅ Critério: ping entre VLANs</h4>
+<ul class="tight">
+<li>Ele vai pingar de hosts de uma VLAN para hosts de outra. <b>Todos</b> têm de responder.</li>
+<li>Um ping só funciona com <b>ida e volta</b>: cada roteador do caminho precisa de rota para o destino <b>e</b> para a origem.</li>
+<li>Antes de entregar, faça a <a href="#ping">matriz de ping</a> completa.</li>
+<li>No fim: <code>wr</code> em <b>todos</b> os roteadores e switches e <kbd>Ctrl</kbd>+<kbd>S</kbd> no arquivo.</li>
+</ul>
+</div>
+</div>
+<div class="box warn">
+<h4>⚠ Redistribuição: o que o professor fez</h4>
+<p>No Lab 7 as notas diziam <i>"Não use redistribuição"</i> e <i>"OSPF Area 3"</i> para o prédio B, mas no gabarito o professor pôs no R2 <code>redistribute connected subnets</code> (as VLANs 30/40 viram <code>O E2 [110/20]</code>). Nos dois exercícios do Lab 6 ele também usou <code>redistribute connected subnets</code> para as LANs. Este guia segue o gabarito. A forma "como a nota pede" (<code>network … area 3</code>) fica numa caixa separada, caso ele cobre o texto da nota.</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="estilo">
+<h2><span class="n">2</span> Como o professor digita <span class="prof">jeito do professor</span> <span class="copy">✍ copiar</span></h2>
+<p class="lead">Todos os comandos abaixo saíram dos logs dos gabaritos. Ele usa abreviações — mais rápidas para digitar e para copiar à mão.</p>
+<div class="tw"><table>
+<tr><th>Ele digita</th><th>O IOS entende</th><th>Onde</th></tr>
+<tr><td><code>ena</code></td><td>enable</td><td><code>&gt;</code></td></tr>
+<tr><td><code>conf t</code></td><td>configure terminal</td><td><code>#</code></td></tr>
+<tr><td><code>hostname R1</code></td><td>—</td><td><code>(config)#</code></td></tr>
+<tr><td><code>int fa0/0</code> · <code>int f1/0</code> · <code>int range fa0/2-3</code> · <code>int range g0/1-2</code> · <code>int po1</code></td><td>interface FastEthernet0/0 · … · interface Port-channel1</td><td><code>(config)#</code></td></tr>
+<tr><td><code>ip add 10.1.1.1 255.255.255.0</code></td><td>ip address …</td><td><code>(config-if)#</code></td></tr>
+<tr><td><code>no shut</code></td><td>no shutdown</td><td><code>(config-if)#</code></td></tr>
+<tr><td><code>switchport mode access</code> · <code>switchport access vlan 10</code></td><td>—</td><td><code>(config-if)#</code></td></tr>
+<tr><td><code>switchport mode trunk</code> · <code>switchport trunk allowed vlan 10,20</code></td><td>—</td><td><code>(config-if)#</code></td></tr>
+<tr><td><code>channel-group 1 mode active</code></td><td>— (LACP; cria o Po1)</td><td><code>(config-if-range)#</code></td></tr>
+<tr><td><code>spanning-tree vlan 10 root primary</code></td><td>—</td><td><code>(config)#</code></td></tr>
+<tr><td><code>router ospf 1</code></td><td>—</td><td><code>(config)#</code></td></tr>
+<tr><td><code>network 10.1.1.0 255.255.255.0 area 1</code></td><td>network 10.1.1.0 <b>0.0.0.255</b> area 1 (o PT converte a máscara em wildcard)</td><td><code>(config-router)#</code></td></tr>
+<tr><td><code>redistribute connected subnets</code> · <code>redistribute static subnets</code></td><td>—</td><td><code>(config-router)#</code></td></tr>
+<tr><td><code>ip route 10.0.1.0 255.255.255.0 10.0.2.2</code></td><td>—</td><td><code>(config)#</code></td></tr>
+<tr><td><code>exit</code> · <code>exit</code> · <code>wr</code></td><td>sai até <code>#</code> e grava (write)</td><td></td></tr>
+<tr><td><code>sh ip route</code> · <code>sh ip int br</code> · <code>sh run</code> · <code>sh spanning-tree</code> · <code>sh ip ospf neighbor</code> · <code>sh ip route 10.0.4.1</code></td><td>show …</td><td><code>#</code></td></tr>
+<tr><td><code>do sh run</code></td><td>show dentro do modo de configuração</td><td><code>(config…)#</code></td></tr>
+<tr><td><code>?</code> (ex.: <code>channel-group 1 mode ?</code>)</td><td>lista as opções — ele usa o tempo todo</td><td>qualquer</td></tr>
+</table></div>
+<div class="box warn"><p style="margin:0"><b>Cuidado com <code>sh run</code> dentro de <code>(config-if)#</code>:</b> no log do Lab 6 o PT registrou <code>sh run =&gt; shutdown</code> numa interface do ROTEADOR2. Dentro do modo de configuração, use <code>do sh run</code> — foi o que ele fez logo em seguida.</p></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="explica">
+<h2><span class="n">2b</span> Cada comando explicado — o que faz e onde é digitado <span class="copy">✍ copiar</span></h2>
+<p class="lead">Na CLI, <b>o prompt diz onde você está</b>, e cada comando só funciona no modo certo. Primeiro o mapa dos modos; depois a configuração de equipamentos reais dos gabaritos, linha por linha; no fim, um dicionário de todos os comandos.</p>
+
+<h3>Os modos da CLI (o prompt)</h3>
+<pre class="modes">Router&gt;                  modo USUÁRIO         só consulta básica (ping). Entrada ao abrir a aba CLI.
+   │ ena
+Router#                  modo PRIVILEGIADO    todos os sh …, ping, wr, reload.
+   │ conf t
+Router(config)#          configuração GLOBAL  vale para o equipamento inteiro: hostname, ip route,
+   │                                          spanning-tree, e a porta de entrada dos submodos:
+   ├── int fa0/0     →  Router(config-if)#        configura UMA porta: ip add, no shut, switchport…
+   ├── int range …   →  Router(config-if-range)#  configura VÁRIAS portas de uma vez
+   └── router ospf 1 →  Router(config-router)#    configura o OSPF: network, redistribute
+
+exit  = sobe um nível (config-if → config → #)        end = volta direto para o #
+De dentro de um submodo dá para ir direto a outro: estando em (config-if)#, digitar int fa0/1 troca de porta,
+e router ospf 1 entra no OSPF. Comandos globais (ip route, hostname) também são aceitos de dentro de um submodo.</pre>
+<p>"Onde": <b>R</b> = roteador, <b>S</b> = switch, <b>H</b> = host (PC/laptop). O nome antes do <code>&gt;</code>/<code>#</code> é o hostname: <code>Switch</code> e <code>Router</code> são o padrão; depois de <code>hostname router0</code> o prompt vira <code>router0#</code>.</p>
+
+<h3>Switch3 do Lab 7 — linha por linha (switch com tudo: canal, trunk, access, STP)</h3>
+<div class="tw"><table class="ex">
+<tr><th>Prompt (onde)</th><th>Linha</th><th>O que faz</th></tr>
+<tr><td>Switch&gt;</td><td>ena</td><td><b>enable</b>: sai do modo usuário e entra no privilegiado (<code>#</code>).</td></tr>
+<tr><td>Switch#</td><td>conf t</td><td><b>configure terminal</b>: entra na configuração global. Tudo o que for digitado a partir daqui muda o equipamento na hora.</td></tr>
+<tr class="sep"><td colspan="3">EtherChannel: as duas portas Gigabit que vão ao SW2 viram um link lógico só</td></tr>
+<tr><td>Switch(config)#</td><td>int range g0/1-2</td><td>Seleciona as portas Gi0/1 e Gi0/2 <b>juntas</b> (os dois cabos para o SW2). O prompt vira <code>(config-if-range)#</code>.</td></tr>
+<tr><td>(config-if-range)#</td><td>channel-group 1 mode active</td><td>Põe as duas portas no <b>EtherChannel nº 1</b>, negociado por <b>LACP</b> em modo <b>ativo</b> (este lado propõe o canal). Cria a interface lógica <b>Port-channel1</b> (Po1). O outro switch precisa do mesmo comando.</td></tr>
+<tr><td>(config-if-range)#</td><td>int po1</td><td>Vai para a interface lógica do canal. O prompt vira <code>(config-if)#</code>. O que for configurado no Po1 vale para as duas portas físicas.</td></tr>
+<tr><td>(config-if)#</td><td>switchport mode trunk</td><td>Faz o canal ser <b>trunk</b>: carrega várias VLANs ao mesmo tempo, cada quadro com a etiqueta (tag 802.1Q) da sua VLAN.</td></tr>
+<tr><td>(config-if)#</td><td>switchport trunk allowed vlan 10,20</td><td>Só as VLANs <b>10 e 20</b> podem passar por este trunk.</td></tr>
+<tr class="sep"><td colspan="3">Trunk comum: a porta que vai ao SW1</td></tr>
+<tr><td>(config-if)#</td><td>int fa0/2</td><td>Troca direto para a porta Fa0/2 (sem precisar dar <code>exit</code>).</td></tr>
+<tr><td>(config-if)#</td><td>switchport mode trunk</td><td>Fa0/2 vira trunk (liga ao SW1, que também tem trunk na Fa0/2).</td></tr>
+<tr><td>(config-if)#</td><td>switchport trunk allowed vlan 10,20</td><td>Deixa passar só as VLANs 10 e 20.</td></tr>
+<tr class="sep"><td colspan="3">Portas access: hosts e as duas portas que vão ao R0</td></tr>
+<tr><td>(config-if)#</td><td>int fa0/5</td><td>Vai para a porta do PC3.</td></tr>
+<tr><td>(config-if)#</td><td>switchport mode access</td><td>A porta vira <b>access</b>: pertence a <b>uma VLAN só</b> e os quadros saem sem etiqueta (o PC não entende tag).</td></tr>
+<tr><td>(config-if)#</td><td>switchport access vlan 10</td><td>Essa porta é da <b>VLAN 10</b>. Se a VLAN 10 ainda não existe no switch, o comando a cria.</td></tr>
+<tr><td>(config-if)#</td><td>int fa0/1</td><td>Porta do Laptop2.</td></tr>
+<tr><td>(config-if)#</td><td>switchport mode access</td><td>Access.</td></tr>
+<tr><td>(config-if)#</td><td>switchport access vlan 20</td><td>VLAN 20.</td></tr>
+<tr><td>(config-if)#</td><td>int fa0/3</td><td>Porta que vai ao <b>R0 Fa0/0</b>.</td></tr>
+<tr><td>(config-if)#</td><td>switchport mode access</td><td>Access: o roteador recebe só a VLAN 10 por este cabo.</td></tr>
+<tr><td>(config-if)#</td><td>switchport access vlan 10</td><td>VLAN 10 → o R0 Fa0/0 (10.1.1.1) fica sendo o gateway da VLAN 10.</td></tr>
+<tr><td>(config-if)#</td><td>int fa0/4</td><td>Porta que vai ao <b>R0 Fa0/1</b>.</td></tr>
+<tr><td>(config-if)#</td><td>switchport mode access</td><td>Access.</td></tr>
+<tr><td>(config-if)#</td><td>switchport access vlan 20</td><td>VLAN 20 → o R0 Fa0/1 (10.1.2.1) fica sendo o gateway da VLAN 20.</td></tr>
+<tr><td>(config-if)#</td><td>exit</td><td>Sai da porta, volta ao <code>(config)#</code>.</td></tr>
+<tr><td>Switch(config)#</td><td>exit</td><td>Sai da configuração, volta ao <code>#</code>.</td></tr>
+<tr><td>Switch#</td><td>wr</td><td><b>write</b>: grava a configuração em uso (running-config) na memória permanente (startup-config). Sem isso, um <code>reload</code> ou desligar apaga tudo.</td></tr>
+<tr class="sep"><td colspan="3">STP: este switch passa a ser o root das VLANs</td></tr>
+<tr><td>Switch#</td><td>sh spanning-tree</td><td><b>show spanning-tree</b>: mostra, por VLAN, quem é o root, a prioridade e o papel/estado de cada porta. Só leitura.</td></tr>
+<tr><td>Switch#</td><td>conf t</td><td>Volta à configuração global.</td></tr>
+<tr><td>Switch(config)#</td><td>spanning-tree vlan 10 root primary</td><td>Baixa a prioridade STP deste switch na <b>VLAN 10</b> (para 24576, ou abaixo do root atual), e ele vence a eleição de <b>root</b>. É comando global: vale para o switch, não para uma porta.</td></tr>
+<tr><td>Switch(config)#</td><td>spanning-tree vlan 20 root primary</td><td>O mesmo para a VLAN 20.</td></tr>
+<tr><td>Switch(config)#</td><td>spanning-tree vlan 1 root primary</td><td>O mesmo para a VLAN 1 (ele também fez).</td></tr>
+<tr><td>Switch(config)#</td><td>exit</td><td>Volta ao <code>#</code>.</td></tr>
+<tr><td>Switch#</td><td>wr</td><td>Grava.</td></tr>
+</table></div>
+
+<h3>Router0 do Lab 7 — linha por linha (ABR: LANs na área 1, enlaces na área 0)</h3>
+<div class="tw"><table class="ex">
+<tr><th>Prompt (onde)</th><th>Linha</th><th>O que faz</th></tr>
+<tr><td>Router&gt;</td><td>ena</td><td>Modo privilegiado.</td></tr>
+<tr><td>Router#</td><td>conf t</td><td>Configuração global.</td></tr>
+<tr><td>Router(config)#</td><td>hostname router0</td><td>Dá nome ao roteador. O prompt muda para <code>router0(config)#</code>. Não afeta o roteamento.</td></tr>
+<tr class="sep"><td colspan="3">Interfaces: cada porta recebe o IP da rede onde o cabo dela está</td></tr>
+<tr><td>router0(config)#</td><td>int fa0/0</td><td>Entra na porta Fa0/0 (cabo para o SW3 Fa0/3, VLAN 10). Prompt <code>(config-if)#</code>.</td></tr>
+<tr><td>router0(config-if)#</td><td>ip add 10.1.1.1 255.255.255.0</td><td><b>ip address</b>: dá à porta o IP 10.1.1.1 com máscara /24. Isso faz o roteador ficar na rede 10.1.1.0/24, e esse IP é o <b>gateway</b> dos hosts da VLAN 10.</td></tr>
+<tr><td>router0(config-if)#</td><td>no shut</td><td><b>no shutdown</b>: liga a porta. Toda porta de roteador vem desligada; sem isso o link fica vermelho.</td></tr>
+<tr><td>router0(config-if)#</td><td>int fa0/1</td><td>Porta Fa0/1 (cabo para SW3 Fa0/4, VLAN 20).</td></tr>
+<tr><td>router0(config-if)#</td><td>ip add 10.1.2.1 255.255.255.0</td><td>Gateway da VLAN 20.</td></tr>
+<tr><td>router0(config-if)#</td><td>no shut</td><td>Liga.</td></tr>
+<tr><td>router0(config-if)#</td><td>int f1/0</td><td>Porta Fa1/0 (slot 1, o módulo), cabo para o R1.</td></tr>
+<tr><td>router0(config-if)#</td><td>ip address 172.16.1.1 255.255.255.252</td><td>IP do enlace R0–R1: rede 172.16.1.0/30, que só tem 2 IPs úteis (.1 = R0, .2 = R1).</td></tr>
+<tr><td>router0(config-if)#</td><td>no shut</td><td>Liga.</td></tr>
+<tr><td>router0(config-if)#</td><td>int fa1/1</td><td>Porta Fa1/1, cabo para o R2.</td></tr>
+<tr><td>router0(config-if)#</td><td>ip add 172.16.1.9 255.255.255.252</td><td>Enlace R0–R2: rede 172.16.1.8/30 (.9 = R0, .10 = R2).</td></tr>
+<tr><td>router0(config-if)#</td><td>no shut</td><td>Liga.</td></tr>
+<tr><td>router0(config-if)#</td><td>exit</td><td>Volta ao <code>(config)#</code>.</td></tr>
+<tr class="sep"><td colspan="3">OSPF: quais portas participam e em que área</td></tr>
+<tr><td>router0(config)#</td><td>router ospf 1</td><td>Liga o processo OSPF nº 1 e entra na configuração dele. Prompt <code>(config-router)#</code>. O "1" é um número local (ele usa 1 em todos os roteadores).</td></tr>
+<tr><td>router0(config-router)#</td><td>network 10.1.1.0 255.255.255.0 area 1</td><td>A porta cujo IP está em 10.1.1.0/24 (a Fa0/0) <b>entra no OSPF na área 1</b>: a rede 10.1.1.0/24 passa a ser anunciada aos outros roteadores. O PT guarda como <code>0.0.0.255</code> (wildcard).</td></tr>
+<tr><td>router0(config-router)#</td><td>network 10.1.2.0 255.255.255.0 area 1</td><td>Mesma coisa para a Fa0/1 (VLAN 20), área 1.</td></tr>
+<tr><td>router0(config-router)#</td><td>network 172.16.1.0 255.255.255.252 area 0</td><td>A Fa1/0 entra no OSPF na <b>área 0</b>: o R0 manda <i>hello</i> por ela, vira vizinho do R1 e troca rotas com ele.</td></tr>
+<tr><td>router0(config-router)#</td><td>network 172.16.1.8 255.255.255.252 area 0</td><td>A Fa1/1 entra na área 0 → vizinho do R2. Como o R0 tem portas nas áreas 0 e 1, ele é o <b>ABR</b>.</td></tr>
+<tr><td>router0(config-router)#</td><td>exit</td><td>Volta ao <code>(config)#</code>.</td></tr>
+<tr><td>router0(config)#</td><td>exit</td><td>Volta ao <code>#</code>.</td></tr>
+<tr><td>router0#</td><td>wr</td><td>Grava.</td></tr>
+</table></div>
+
+<h3>Router2 do Lab 7 — só a parte nova: redistribuição</h3>
+<div class="tw"><table class="ex">
+<tr><th>Prompt (onde)</th><th>Linha</th><th>O que faz</th></tr>
+<tr><td>Router(config)#</td><td>router ospf 1</td><td>Entra no OSPF.</td></tr>
+<tr><td>Router(config-router)#</td><td>network 172.16.1.4 255.255.255.252 area 0</td><td>Fa0/0 (enlace com R1) na área 0.</td></tr>
+<tr><td>Router(config-router)#</td><td>network 172.16.1.8 255.255.255.252 area 0</td><td>Fa0/1 (enlace com R0) na área 0.</td></tr>
+<tr><td>Router(config-router)#</td><td>redistribute connected subnets</td><td>Injeta no OSPF <b>todas as redes ligadas diretamente</b> a este roteador que não entraram por <code>network</code> — aqui, as VLANs 30 (10.2.3.0) e 40 (10.2.4.0). <code>subnets</code> = inclui redes com máscara diferente da classe (sem essa palavra, quase nada seria importado). Os outros roteadores veem essas redes como <code>O E2 [110/20]</code>.</td></tr>
+</table></div>
+
+<h3>Lab 6, exercício 2 — rotas estáticas</h3>
+<div class="tw"><table class="ex">
+<tr><th>Prompt (onde)</th><th>Linha</th><th>O que faz</th></tr>
+<tr class="sep"><td colspan="3">Router9 (hostname R1): roteador "estático", sem OSPF</td></tr>
+<tr><td>R1(config)#</td><td>ip route 0.0.0.0 0.0.0.0 10.0.2.1</td><td><b>Rota padrão</b>: "qualquer destino que eu não conheço (0.0.0.0 com máscara 0.0.0.0 = tudo), entrego para 10.0.2.1" (o R1 do anel). É o "gateway" de um roteador. Comando <b>global</b> (ele digitou de dentro de uma interface e o IOS aceitou).</td></tr>
+<tr class="sep"><td colspan="3">R1 do anel: vizinho OSPF do estático (ASBR)</td></tr>
+<tr><td>R1(config)#</td><td>ip route 10.0.1.0 255.255.255.0 10.0.2.2</td><td><b>Rota estática</b>: "para chegar na rede 10.0.1.0/24, entrego para 10.0.2.2" (o Router9, que tem essa LAN). Formato: <code>ip route «rede» «máscara» «próximo salto»</code>.</td></tr>
+<tr><td>R1(config)#</td><td>router ospf 1</td><td>Entra no OSPF.</td></tr>
+<tr><td>R1(config-router)#</td><td>redistribute static subnets</td><td>Anuncia no OSPF as <b>rotas estáticas</b> deste roteador (a 10.0.1.0/24). Sem isso, só o R1 saberia chegar lá, e as respostas dos outros roteadores não voltariam.</td></tr>
+<tr class="sep"><td colspan="3">R2 (Router10): outro estático</td></tr>
+<tr><td>R2(config)#</td><td>ip route 10.0.0.0 255.0.0.0 10.0.3.1</td><td>Toda rede que começa com 10. (/8) → entregar ao R3.</td></tr>
+<tr><td>R2(config)#</td><td>ip route 192.168.1.0 255.255.255.0 10.0.3.1</td><td>Os enlaces do anel (192.168.1.x) → entregar ao R3. As duas linhas juntas fazem o papel de uma rota padrão.</td></tr>
+</table></div>
+
+<h3>Dicionário: todos os comandos dos gabaritos</h3>
+<div class="tw"><table>
+<tr><th>Comando</th><th>Onde</th><th>Prompt</th><th>O que faz</th></tr>
+<tr><td><code>ena</code></td><td>R, S</td><td><code>&gt;</code></td><td>Entra no modo privilegiado.</td></tr>
+<tr><td><code>conf t</code></td><td>R, S</td><td><code>#</code></td><td>Entra na configuração global.</td></tr>
+<tr><td><code>exit</code></td><td>R, S</td><td>qualquer</td><td>Sobe um nível.</td></tr>
+<tr><td><code>end</code></td><td>R, S</td><td>qualquer config</td><td>Volta direto ao <code>#</code>.</td></tr>
+<tr><td><code>hostname X</code></td><td>R, S</td><td><code>(config)#</code></td><td>Nome do equipamento (aparece no prompt).</td></tr>
+<tr><td><code>int fa0/0</code> · <code>int f1/0</code> · <code>int po1</code></td><td>R, S</td><td><code>(config)#</code> ou outro submodo</td><td>Entra numa porta (física ou o Port-channel).</td></tr>
+<tr><td><code>int range fa0/2-3</code> · <code>int range g0/1-2</code></td><td>S</td><td><code>(config)#</code></td><td>Entra em várias portas de uma vez.</td></tr>
+<tr><td><code>ip add «IP» «máscara»</code></td><td>R</td><td><code>(config-if)#</code></td><td>Dá IP à porta; a porta passa a pertencer àquela rede.</td></tr>
+<tr><td><code>no ip address</code></td><td>R</td><td><code>(config-if)#</code></td><td>Tira o IP da porta.</td></tr>
+<tr><td><code>no shut</code> / <code>shut</code></td><td>R (S)</td><td><code>(config-if)#</code></td><td>Liga / desliga a porta.</td></tr>
+<tr><td><code>switchport mode access</code></td><td>S</td><td><code>(config-if)#</code></td><td>Porta de uma VLAN só (host ou roteador com uma porta por VLAN).</td></tr>
+<tr><td><code>switchport access vlan N</code></td><td>S</td><td><code>(config-if)#</code></td><td>Qual VLAN a porta access carrega (cria a VLAN se não existir).</td></tr>
+<tr><td><code>switchport mode trunk</code></td><td>S</td><td><code>(config-if)#</code></td><td>Porta que carrega várias VLANs (entre switches).</td></tr>
+<tr><td><code>switchport trunk allowed vlan 10,20</code></td><td>S</td><td><code>(config-if)#</code></td><td>Quais VLANs podem passar pelo trunk.</td></tr>
+<tr><td><code>channel-group 1 mode active</code></td><td>S</td><td><code>(config-if-range)#</code></td><td>Junta as portas no EtherChannel 1 (LACP); cria o Po1.</td></tr>
+<tr><td><code>spanning-tree vlan N root primary</code></td><td>S (só o root)</td><td><code>(config)#</code></td><td>Faz o switch ser o root do STP na VLAN N.</td></tr>
+<tr><td><code>router ospf 1</code></td><td>R</td><td><code>(config)#</code></td><td>Liga o OSPF e entra nele.</td></tr>
+<tr><td><code>network «rede» «máscara» area N</code></td><td>R</td><td><code>(config-router)#</code></td><td>A porta que está nessa rede entra no OSPF, na área N.</td></tr>
+<tr><td><code>no network …</code></td><td>R</td><td><code>(config-router)#</code></td><td>Desfaz um <code>network</code>.</td></tr>
+<tr><td><code>redistribute connected subnets</code></td><td>R</td><td><code>(config-router)#</code></td><td>Anuncia no OSPF as redes ligadas ao roteador (→ <code>O E2</code>).</td></tr>
+<tr><td><code>redistribute static subnets</code></td><td>R</td><td><code>(config-router)#</code></td><td>Anuncia no OSPF as rotas estáticas do roteador (→ <code>O E2</code>).</td></tr>
+<tr><td><code>ip route «rede» «máscara» «próximo salto»</code></td><td>R</td><td><code>(config)#</code></td><td>Rota estática. Com <code>0.0.0.0 0.0.0.0</code> = rota padrão.</td></tr>
+<tr><td><code>wr</code></td><td>R, S</td><td><code>#</code></td><td>Grava a config (sobrevive a reload).</td></tr>
+<tr><td><code>sh run</code></td><td>R, S</td><td><code>#</code></td><td>Mostra a configuração em uso.</td></tr>
+<tr><td><code>do sh run</code></td><td>R, S</td><td>qualquer config</td><td>O mesmo, sem sair do modo de configuração.</td></tr>
+<tr><td><code>sh ip int br</code></td><td>R</td><td><code>#</code></td><td>Lista portas, IPs e se estão up/down.</td></tr>
+<tr><td><code>sh ip route</code> · <code>sh ip route «IP»</code></td><td>R</td><td><code>#</code></td><td>Tabela de rotas inteira / a rota usada para aquele IP.</td></tr>
+<tr><td><code>sh ip ospf neighbor</code></td><td>R</td><td><code>#</code></td><td>Vizinhos OSPF (tem de estar FULL).</td></tr>
+<tr><td><code>sh ip ospf database</code></td><td>R</td><td><code>#</code></td><td>O "mapa" que o OSPF montou (ele mostrou no Lab 6).</td></tr>
+<tr><td><code>clear ip ospf process</code></td><td>R</td><td><code>#</code></td><td>Reinicia o OSPF (confirmar com yes). Ele usou no Lab 6.</td></tr>
+<tr><td><code>sh spanning-tree</code></td><td>S</td><td><code>#</code></td><td>Root, prioridades e estado das portas, por VLAN.</td></tr>
+<tr><td><code>ping «IP»</code></td><td>R, S, H</td><td><code>#</code> / Command Prompt</td><td>Testa se o destino responde (ida e volta).</td></tr>
+<tr><td><code>reload</code></td><td>R, S</td><td><code>#</code></td><td>Reinicia o equipamento (perde o que não foi gravado com <code>wr</code>).</td></tr>
+<tr><td><code>?</code></td><td>R, S</td><td>qualquer</td><td>Lista o que pode ser digitado ali.</td></tr>
+<tr><td>IP Configuration: IP, Subnet Mask, Default Gateway</td><td>H</td><td>Desktop</td><td>Endereço do host, máscara e gateway (= IP do roteador na VLAN do host).</td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="fases">
+<h2><span class="n">3</span> As fases e a ordem em que ele trabalha <span class="copy">✍ copiar</span></h2>
+<p class="lead">Primeiro <b>papel</b> (F1–F4), depois <b>teclado</b> (F5–F7), depois <b>prova real</b> (F8).</p>
+<div class="flow">
+<a href="#f1"><b>F1 · papel</b>Ler e inventariar<br><span>notas, equipamentos, portas</span></a>
+<a href="#f2"><b>F2 · papel</b>Desenhar e contar redes<br><span>1 rede por interface de roteador / VLAN</span></a>
+<a href="#f3"><b>F3 · papel</b>Endereçar<br><span>LAN /24 gw .1 · R–R /30</span></a>
+<a href="#f4"><b>F4 · papel</b>Planejar roteamento<br><span>áreas, ABR, redistribute, estáticas</span></a>
+<a href="#f5"><b>F5 · CLI</b>Switches<br><span>access, trunk, canal, root primary</span></a>
+<a href="#f6"><b>F6 · CLI</b>Interfaces e hosts<br><span>ip add + no shut</span></a>
+<a href="#f7"><b>F7 · CLI</b>OSPF e estáticas<br><span>network com máscara, area N</span></a>
+<a href="#f8"><b>F8 · teste</b>Verificar e salvar<br><span>sh ip route, ping, wr</span></a>
+</div>
+<div class="box">
+<h4>A ordem exata do gabarito do Lab 7 <span class="prof">jeito do professor</span></h4>
+<ol class="tight">
+<li>R0: hostname e as duas interfaces de LAN (VLAN 10 e 20).</li>
+<li>Switches do prédio A, um por vez: SW0 → SW1 → SW2 (com o EtherChannel) → SW3 (EtherChannel, portas do roteador). <code>wr</code> em cada.</li>
+<li><code>sh spanning-tree</code> no SW3 → <code>root primary</code> nas VLANs → <code>sh spanning-tree</code> de novo.</li>
+<li>SW5 (prédio B).</li>
+<li>R2 e R1: interfaces de LAN → <code>ping</code> do roteador para o host da LAN.</li>
+<li>Enlaces R–R (/30): R0 → R1 → R2.</li>
+<li>OSPF: R0 → R1 (<code>sh ip route</code>) → R2 (com <code>redistribute connected subnets</code>).</li>
+<li><code>sh ip route</code> em R1 e R0, <code>sh ip int br</code>, <code>ping</code> de um roteador para um host.</li>
+<li><code>wr</code> em todos.</li>
+</ol>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="f1">
+<h2><span class="n">F1</span> Ler e inventariar</h2>
+<p class="lead">Saber <b>o que existe</b>, <b>o que liga em quê</b> (porta por porta) e <b>o que o enunciado pede</b>.</p>
+<h3>1.1 Onde está o enunciado <span class="copy">✍ copiar</span></h3>
+<ul>
+<li><b>Notas de texto na área de trabalho</b> — o professor escreve o enunciado nelas, às vezes fora da tela. Dê zoom out e procure: "Pede-se", "Area 1", "Nao use redistribuicao", "Estatico", "deve ser o Root", "cada interface do router numa VLAN".</li>
+<li><b>Nome dos equipamentos</b>: "Laptop0 - VLAN 10", "PC2 - VLAN 20" já dizem a VLAN. Rótulos "Prédio A", "Area 0", "OSPF Area 1" dizem a área.</li>
+<li><b>Prefixos escritos no desenho</b> (Lab 6: <code>192.168.1.16/30</code>, <code>10.0.3.0/24 - Estatico</code>): se vierem, use exatamente esses.</li>
+</ul>
+<h3>1.2 Descobrir as portas <span class="copy">✍ copiar</span></h3>
+<ul>
+<li>Passe o mouse sobre o cabo/equipamento: o PT mostra as portas.</li>
+<li><code>sh ip int br</code> no roteador mostra as interfaces que existem.</li>
+<li><span class="fora">fora do gabarito</span> <code>sh cdp neighbors</code> mostra vizinho · porta local · porta do vizinho. Só leitura; útil se o desenho estiver confuso.</li>
+</ul>
+<h3>1.3 Nomes de interface dos modelos usados</h3>
+<div class="tw"><table>
+<tr><th>Equipamento</th><th>Portas</th><th>Observação</th></tr>
+<tr><td>Roteador 2621XM</td><td><code>fa0/0</code>, <code>fa0/1</code></td><td>Sobe com tudo em <b>shutdown</b> — sempre <code>no shut</code>.</td></tr>
+<tr><td>Módulo NM-2FE2W no 2621XM</td><td><code>f1/0</code>, <code>fa1/1</code></td><td>R0, R1, R2 do Lab 7; R1, R4 e ROTEADOR1–3 do Lab 6.</td></tr>
+<tr><td>Módulo WIC-2T no 2621XM</td><td><code>ser0/0</code>, <code>ser0/1</code> (seriais)</td><td>Provas 2025. Configura igual a uma <code>fa</code>: <code>int ser0/0</code> → <code>ip add</code> → <code>no shut</code>. O <code>clock rate 2000000</code> já vem no lado DCE.</td></tr>
+<tr><td>Switch 2950T-24</td><td><code>fa0/1</code>–<code>fa0/24</code>, <code>g0/1</code>, <code>g0/2</code></td><td>Sobe com tudo ativo, tudo na VLAN 1. Trunk só 802.1Q (não pede encapsulation).</td></tr>
+</table></div>
+<h3>1.4 Luzes dos links</h3>
+<ul class="tight">
+<li><b>Verde</b>: ok. <b>Laranja</b>: porta de switch convergindo no STP ou bloqueada — normal num anel.</li>
+<li><b>Vermelho</b>: interface sem <code>no shut</code>, cabo errado ou porta de EtherChannel suspensa.</li>
+</ul>
+<h3>1.5 Tabela de inventário (desenhe em branco) <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Equipamento</th><th>Porta</th><th>Liga em (equip. / porta)</th><th>Função (access VLAN x / trunk / canal / R–R / LAN)</th></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="f2">
+<h2><span class="n">F2</span> Desenhar e contar as redes</h2>
+<p class="lead">Redesenhe no papel: caixas para roteadores, traços para links, a porta escrita nas duas pontas. Depois conte as redes IP.</p>
+<h3>2.1 Regras de contagem <span class="copy">✍ copiar</span></h3>
+<ol class="steps">
+<li><b>Cada interface de roteador está numa rede diferente.</b></li>
+<li><b>Cada VLAN é uma rede.</b> A VLAN é definida pela <b>porta do switch</b>, não pelo IP.</li>
+<li><b>Switch sem VLAN não separa nada</b>: tudo pendurado nele é uma rede só (prédio C do Lab 7, LANs do Lab 6).</li>
+<li><b>Enlace roteador–roteador = uma rede /30.</b></li>
+<li>Trunk e EtherChannel não criam rede: só transportam as VLANs.</li>
+</ol>
+<h3>2.2 Exemplo: o Lab 7 tem 8 redes</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>Rede</th><th>Por quê</th><th>Área</th></tr>
+<tr><td>1–2</td><td>VLAN 10 e VLAN 20 (prédio A)</td><td>uma porta do R0 em cada VLAN</td><td>1</td></tr>
+<tr><td>3</td><td>LAN do prédio C</td><td>R1 f1/0 + SW4 sem VLAN</td><td>2</td></tr>
+<tr><td>4–5</td><td>VLAN 30 e VLAN 40 (prédio B)</td><td>uma porta do R2 em cada VLAN</td><td>3 (no gabarito: redistribuídas)</td></tr>
+<tr><td>6–8</td><td>R0–R1, R1–R2, R2–R0</td><td>3 enlaces R–R → 3 redes /30</td><td>0</td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="f3">
+<h2><span class="n">F3</span> Endereçar</h2>
+<h3>3.1 O padrão dos gabaritos <span class="prof">jeito do professor</span> <span class="copy">✍ copiar</span></h3>
+<ul>
+<li><b>LANs/VLANs: /24</b> (<code>255.255.255.0</code>). <b>Gateway = .1</b> (interface do roteador). Hosts a partir de <b>.2</b>.</li>
+<li>Lab 7: <code>10.«prédio».«VLAN».0/24</code> — VLAN 10 <code>10.1.1.0</code>, VLAN 20 <code>10.1.2.0</code>, VLAN 30 <code>10.2.3.0</code>, VLAN 40 <code>10.2.4.0</code>, prédio C <code>10.4.0.0</code>.</li>
+<li><b>Enlaces R–R: /30</b> (<code>255.255.255.252</code>) em sequência: <code>172.16.1.0</code>, <code>.4</code>, <code>.8</code> (Lab 7) · <code>172.16.10.0</code>, <code>.4</code>, <code>.8</code> (Lab 6 ex. 1) · <code>192.168.1.0</code>, <code>.4</code>, <code>.8</code>, <code>.12</code>, <code>.16</code> (Lab 6 ex. 2).</li>
+<li>Num /30, um lado fica com o 1º host (.1, .5, .9…) e o outro com o 2º (.2, .6, .10…).</li>
+<li>Roteador estático numa LAN que já tem gateway (Lab 6 ex. 2): fica com <b>.2</b> (o roteador OSPF é o .1); hosts dessa LAN a partir de .3.</li>
+</ul>
+<h3>3.2 Máscaras <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Prefixo</th><th>Máscara</th><th>Wildcard</th><th>Hosts úteis</th><th>Blocos começam em</th></tr>
+<tr><td>/24</td><td>255.255.255.0</td><td>0.0.0.255</td><td>254</td><td>.0</td></tr>
+<tr><td>/25</td><td>255.255.255.128</td><td>0.0.0.127</td><td>126</td><td>.0 .128</td></tr>
+<tr><td>/26</td><td>255.255.255.192</td><td>0.0.0.63</td><td>62</td><td>.0 .64 .128 .192</td></tr>
+<tr><td>/27</td><td>255.255.255.224</td><td>0.0.0.31</td><td>30</td><td>múltiplos de 32</td></tr>
+<tr><td>/28</td><td>255.255.255.240</td><td>0.0.0.15</td><td>14</td><td>múltiplos de 16</td></tr>
+<tr><td>/29</td><td>255.255.255.248</td><td>0.0.0.7</td><td>6</td><td>múltiplos de 8</td></tr>
+<tr><td>/30</td><td>255.255.255.252</td><td>0.0.0.3</td><td>2</td><td>múltiplos de 4</td></tr>
+<tr><td>/8</td><td>255.0.0.0</td><td>0.255.255.255</td><td>—</td><td>—</td></tr>
+</table></div>
+<p class="muted">O professor escreve a <b>máscara</b> também no <code>network</code> do OSPF; a wildcard só aparece se você preferir (ele usou <code>0.0.0.3</code> uma vez no Lab 6). Hosts úteis = 2<sup>(32−prefixo)</sup> − 2.</p>
+<h3>3.3 Blocos /30 em sequência <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Rede</th><th>Host 1</th><th>Host 2</th><th>Broadcast</th><th></th><th>Rede</th><th>Host 1</th><th>Host 2</th><th>Broadcast</th></tr>
+<tr><td>.0</td><td>.1</td><td>.2</td><td>.3</td><td></td><td>.20</td><td>.21</td><td>.22</td><td>.23</td></tr>
+<tr><td>.4</td><td>.5</td><td>.6</td><td>.7</td><td></td><td>.24</td><td>.25</td><td>.26</td><td>.27</td></tr>
+<tr><td>.8</td><td>.9</td><td>.10</td><td>.11</td><td></td><td>.28</td><td>.29</td><td>.30</td><td>.31</td></tr>
+<tr><td>.12</td><td>.13</td><td>.14</td><td>.15</td><td></td><td>.32</td><td>.33</td><td>.34</td><td>.35</td></tr>
+<tr><td>.16</td><td>.17</td><td>.18</td><td>.19</td><td></td><td>.36</td><td>.37</td><td>.38</td><td>.39</td></tr>
+</table></div>
+<h3>3.4 Se vier um bloco único para dividir (VLSM) <span class="fora">fora do gabarito</span></h3>
+<p>Não apareceu nos Labs 6 e 7, mas é matéria da P1. Hosts + 2 → potência de 2 → prefixo; ordene do maior para o menor; aloque em sequência (cada bloco começa num múltiplo do próprio tamanho); /30 por último. Ex.: <code>192.168.10.0/24</code> com 60, 25 e 10 hosts + 3 enlaces → <code>.0/26</code>, <code>.64/27</code>, <code>.96/28</code>, <code>.112/30</code>, <code>.116/30</code>, <code>.120/30</code>.</p>
+<h3>3.5 Tabela de endereçamento (desenhe em branco) <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Rede / VLAN</th><th>Endereço/prefixo</th><th>Máscara</th><th>Gateway (porta do roteador)</th><th>Hosts (nome → IP)</th><th>Área</th></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="f4">
+<h2><span class="n">F4</span> Planejar o roteamento</h2>
+<h3>4.1 Regras do OSPF que importam <span class="copy">✍ copiar</span></h3>
+<ul>
+<li>Tem de existir a <b>área 0</b>. <b>Toda área ≠ 0 encosta na área 0 por um ABR</b> (roteador com interfaces nas duas: R0 e R1 no Lab 7, R4 no Lab 6).</li>
+<li>Os dois lados de um enlace precisam estar na <b>mesma área</b> e na <b>mesma sub-rede</b>.</li>
+<li>O <code>network</code> diz <b>quais interfaces</b> entram no OSPF e em que área. Ele faz <b>um <code>network</code> por interface</b>.</li>
+<li>Toda LAN precisa entrar no OSPF (por <code>network</code> ou <code>redistribute connected subnets</code>); senão o ping de volta falha.</li>
+</ul>
+<h3>4.2 O que ele fez em cada situação <span class="prof">jeito do professor</span> <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Situação no desenho</th><th>No gabarito</th><th>Nos outros roteadores aparece</th></tr>
+<tr><td>Enlace R–R na área 0 (ou 1, se o desenho diz)</td><td><code>network «rede» «máscara» area «N»</code> nos dois roteadores</td><td><code>O</code> / <code>O IA</code></td></tr>
+<tr><td>LAN/VLAN de um roteador com área indicada (Lab 7: prédios A e C)</td><td><code>network «rede» 255.255.255.0 area «N»</code></td><td><code>O IA [110/2]</code></td></tr>
+<tr><td>LANs do Lab 6 e VLANs 30/40 do Lab 7 (R2)</td><td><code>redistribute connected subnets</code></td><td><code>O E2 [110/20]</code></td></tr>
+<tr><td>Roteador <b>"estático"</b> (sem OSPF) atrás de um roteador OSPF</td><td>No estático: <code>ip route 0.0.0.0 0.0.0.0 «IP do OSPF»</code> (ou rotas para <code>10.0.0.0 255.0.0.0</code> e <code>192.168.1.0 255.255.255.0</code>).<br>No vizinho OSPF: <code>ip route «LAN de trás» 255.255.255.0 «IP do estático»</code> + <code>redistribute static subnets</code>.</td><td><code>O E2 [110/20]</code></td></tr>
+<tr><td>Roteador <b>de parceiros</b> já configurado (vermelho, não mexer; provas 2025)</td><td>Só no vizinho OSPF: o IP <b>imposto</b> na interface para o parceiro + <code>ip route «rede dos parceiros» 255.255.255.0 «IP do parceiro»</code> + <code>redistribute static subnets</code> (e <code>redistribute connected subnets</code>).</td><td><code>O E2 [110/20]</code></td></tr>
+</table></div>
+<h3>4.3 Plano por roteador (desenhe em branco) <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Roteador</th><th>Interface</th><th>IP / máscara</th><th>Liga em</th><th><code>network … area</code></th><th>redistribute / ip route</th></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+<h3>4.4 Plano por switch (desenhe em branco) <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Switch</th><th>access VLAN __</th><th>access VLAN __</th><th>Trunks</th><th>EtherChannel</th><th>root primary?</th></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td class="blank"></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="f5">
+<h2><span class="n">F5</span> Switches <span class="prof">jeito do professor</span></h2>
+<p class="lead">Um switch inteiro de cada vez, terminando com <code>wr</code>. Ele <b>não cria as VLANs com <code>vlan 10</code></b>: o próprio <code>switchport access vlan 10</code> cria a VLAN no switch.</p>
+<h3>5.1 Portas access e trunks <span class="copy">✍ copiar</span></h3>
+<pre class="cli">ena
+conf t
+int fa0/<span class="ph">«1»</span>
+switchport mode access
+switchport access vlan <span class="ph">«10»</span>
+int fa0/<span class="ph">«4»</span>
+switchport mode access
+switchport access vlan <span class="ph">«20»</span>
+int range fa0/<span class="ph">«2-3»</span>                   <span class="c">! portas que vão para outros switches</span>
+switchport mode trunk
+switchport trunk allowed vlan <span class="ph">«10,20»</span>
+exit
+exit
+wr</pre>
+<div class="box warn"><p style="margin:0"><b>Quando o jeito dele não basta:</b> no Lab 7 todo switch tinha host nas duas VLANs, então todas as VLANs existiam em todos. Se na prova um switch <b>só passar</b> uma VLAN pelo trunk (sem nenhuma porta access nela), a VLAN não existe nele e não passa. Aí crie: <code>conf t</code> → <code>vlan 10</code> → <code>vlan 20</code> → <code>exit</code> (é o comando dos slides do Lab 1). Confira com <code>sh vlan brief</code>.</p></div>
+<p class="muted">Ele usou <code>switchport mode access</code> no SW3, no SW5 e em uma porta do SW1; no SW0 e no SW2 deu só <code>switchport access vlan</code> — funciona igual porque a porta sem trunk vira access. Escrever o <code>mode access</code> sempre é o mais seguro.</p>
+
+<h3>5.2 EtherChannel (dois cabos entre o mesmo par de switches) <span class="copy">✍ copiar</span></h3>
+<pre class="cli"><span class="c">! nos DOIS switches (no Lab 7: SW2 e SW3)</span>
+int range g0/1-2
+channel-group 1 mode active                <span class="c">! LACP; cria o Port-channel1</span>
+int po1
+switchport mode trunk                      <span class="c">! trunk configurado no Po1, não nas físicas</span>
+switchport trunk allowed vlan <span class="ph">«10,20»</span></pre>
+<ul>
+<li>Ele usou <b><code>active</code> nos dois lados</b>. (active+passive também forma; passive+passive não; LACP não fala com PAgP <code>desirable/auto</code> nem com <code>on</code>.)</li>
+<li>Cabos cruzados (SW2 g0/1 ↔ SW3 g0/2) não importam: o canal junta as duas portas.</li>
+<li>Ele descobriu a sintaxe com <code>channel-group ?</code> → <code>channel-group 1 ?</code> → <code>channel-group 1 mode ?</code>. Use o <code>?</code> se travar.</li>
+</ul>
+
+<h3>5.3 STP: escolher o root <span class="copy">✍ copiar</span></h3>
+<pre class="cli"><span class="c">! SÓ no switch que deve ser o root (Lab 7: "o switch onde o router se conecta" = SW3)</span>
+sh spanning-tree                           <span class="c">! antes: ver quem é o root</span>
+conf t
+spanning-tree vlan <span class="ph">«10»</span> root primary
+spanning-tree vlan <span class="ph">«20»</span> root primary
+spanning-tree vlan 1 root primary          <span class="c">! ele fez também na VLAN 1</span>
+exit
+sh spanning-tree                           <span class="c">! depois: "This bridge is the root" em cada VLAN</span>
+wr</pre>
+<ul>
+<li><b><code>root primary</code> é o método que o professor recomenda.</b> Ele põe a prioridade em 24576 (ou abaixo do root atual), menor que o padrão 32768.</li>
+<li>O valor é calculado <b>na hora do comando</b>. Se outro switch receber <code>root primary</code> depois, ele fica abaixo; aí repita o comando no switch que deve ser o root (no log ele repetiu no SW3). Na prova, dê <code>root primary</code> <b>só no switch pedido</b>.</li>
+<li>No gabarito também há <code>spanning-tree vlan 10 priority 12288</code> no SW3: foi resposta à pergunta de um aluno sobre forçar uma prioridade (valor múltiplo de 4096). O método indicado continua sendo <code>root primary</code>.</li>
+<li>Eleição: menor prioridade vence; empate → menor MAC. No <code>sh spanning-tree</code> a prioridade aparece somada à VLAN (24576 + 10 = 24586).</li>
+<li>Num anel de switches, uma porta fica <b>bloqueada</b> (<code>Altn BLK</code>, luz laranja). É o esperado.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="f6">
+<h2><span class="n">F6</span> Interfaces dos roteadores e hosts <span class="prof">jeito do professor</span></h2>
+<h3>6.1 Roteador <span class="copy">✍ copiar</span></h3>
+<pre class="cli">ena
+conf t
+hostname <span class="ph">«R1»</span>                            <span class="c">! ele deu hostname no Lab 6 e no R0 do Lab 7</span>
+int fa0/<span class="ph">«0»</span>
+ip add <span class="ph">«10.1.1.1 255.255.255.0»</span>
+no shut                                    <span class="c">! roteador sobe DESLIGADO</span>
+int f1/<span class="ph">«0»</span>
+ip add <span class="ph">«172.16.1.1 255.255.255.252»</span>
+no shut
+exit
+exit
+sh ip int br                               <span class="c">! up / up nas interfaces usadas</span>
+wr</pre>
+<ul>
+<li><b>Errou o IP?</b> Digite <code>ip add</code> de novo — substitui (ele fez isso várias vezes). <b>Interface errada?</b> <code>no ip address</code> nela (ele fez no R1 do Lab 7).</li>
+<li>Depois de configurar a LAN, ele testa do roteador: <code>ping «IP do host»</code>.</li>
+</ul>
+<h3>6.2 Hosts <span class="copy">✍ copiar</span></h3>
+<ul>
+<li><b>Como ele fez:</b> PC → <b>Desktop → IP Configuration</b> → Static → IP, Subnet Mask, Default Gateway.</li>
+<li><b>Se exigir linha de comando:</b> Desktop → Command Prompt → <code>ipconfig «IP» «máscara» «gateway»</code>; conferir com <code>ipconfig</code>.</li>
+<li><b>Gateway = IP da interface do roteador na VLAN do host</b> (o .1). Sem gateway, o host só fala com a própria VLAN.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="f7">
+<h2><span class="n">F7</span> OSPF e rotas estáticas <span class="prof">jeito do professor</span></h2>
+<h3>7.1 OSPF <span class="copy">✍ copiar</span></h3>
+<pre class="cli">conf t
+router ospf 1
+network <span class="ph">«10.1.1.0 255.255.255.0»</span> area <span class="ph">«1»</span>         <span class="c">! LAN, com a MÁSCARA (o PT converte)</span>
+network <span class="ph">«172.16.1.0 255.255.255.252»</span> area <span class="ph">«0»</span>    <span class="c">! um network por interface</span>
+redistribute connected subnets                       <span class="c">! quando as LANs vão por redistribuição</span>
+exit
+exit
+wr</pre>
+<ul>
+<li><b>Um <code>network</code> por interface</b>, com a rede (não o IP do roteador) e a área daquela interface.</li>
+<li>Errou? <code>no network …</code> com a mesma linha (ele fez no R1 do Lab 7: <code>no network 172.16.4.0 255.255.255.252 area 0</code>).</li>
+<li>Sempre <code>subnets</code> no final do <code>redistribute</code>.</li>
+</ul>
+<h3>7.2 Roteador estático <span class="copy">✍ copiar</span></h3>
+<pre class="cli"><span class="c">! no roteador estático (sem OSPF): rota padrão para o vizinho OSPF</span>
+ip route 0.0.0.0 0.0.0.0 <span class="ph">«10.0.2.1»</span>
+
+<span class="c">! no roteador OSPF vizinho: rota para a LAN de trás + anunciar</span>
+ip route <span class="ph">«10.0.1.0 255.255.255.0» «10.0.2.2»</span>
+router ospf 1
+redistribute static subnets</pre>
+<p>Formato: <code>ip route «rede» «máscara» «próximo salto»</code>. Ele confere com <code>sh ip route «IP do destino»</code> e <code>ping</code>.</p>
+<h3>7.3 Ler a tabela de rotas <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Código</th><th>Significado</th><th>Exemplo</th></tr>
+<tr><td><code>C</code></td><td>Diretamente conectada</td><td><code>C 10.1.1.0/24 is directly connected, FastEthernet0/0</code></td></tr>
+<tr><td><code>S</code> / <code>S*</code></td><td>Estática / padrão</td><td><code>S* 0.0.0.0/0 [1/0] via 10.0.2.1</code></td></tr>
+<tr><td><code>O</code></td><td>OSPF, mesma área</td><td><code>O 172.16.1.8 [110/2] via 172.16.1.1</code></td></tr>
+<tr><td><code>O IA</code></td><td>OSPF, outra área</td><td><code>O IA 10.1.1.0 [110/2] via 172.16.1.1</code></td></tr>
+<tr><td><code>O E2</code></td><td>OSPF redistribuída; custo fixo 20</td><td><code>O E2 10.2.3.0 [110/20] via 172.16.1.6</code></td></tr>
+</table></div>
+<p><code>[110/2]</code> = [distância administrativa / custo]. OSPF 110, estática 1. Cada FastEthernet custa 1.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="f8">
+<h2><span class="n">F8</span> Verificar e salvar</h2>
+<h3>8.1 Os comandos que ele usa <span class="prof">jeito do professor</span> <span class="copy">✍ copiar</span></h3>
+<div class="tw"><table>
+<tr><th>Onde</th><th>Comando</th><th>O que tem de aparecer</th></tr>
+<tr><td>switch</td><td><code>sh spanning-tree</code></td><td>No switch escolhido: "This bridge is the root" em cada VLAN.</td></tr>
+<tr><td>switch/roteador</td><td><code>sh run</code></td><td>Conferir portas, VLANs, trunks, canal, <code>network</code>.</td></tr>
+<tr><td>roteador</td><td><code>sh ip int br</code></td><td>IPs certos; <code>up up</code> nas usadas.</td></tr>
+<tr><td>roteador</td><td><code>sh ip ospf neighbor</code></td><td>Um vizinho por enlace R–R, estado <code>FULL</code>.</td></tr>
+<tr><td>roteador</td><td><code>sh ip route</code></td><td>Uma rota para <b>cada</b> rede (C, O, O IA, O E2, S).</td></tr>
+<tr><td>roteador</td><td><code>sh ip route «IP»</code></td><td>Por onde o roteador manda aquele destino.</td></tr>
+<tr><td>roteador/host</td><td><code>ping «IP»</code></td><td>Respostas (<code>!!!!!</code> no roteador).</td></tr>
+</table></div>
+<h3>8.2 Verificações extras <span class="fora">fora do gabarito</span></h3>
+<p>Só leitura, não alteram nada: <code>sh vlan brief</code> (porta em qual VLAN), <code>sh interfaces trunk</code> (trunks e VLANs permitidas), <code>sh etherchannel summary</code> (esperado <code>Po1(SU)</code> e portas <code>(P)</code>), <code>tracert «IP»</code> no host.</p>
+<h3>8.3 Salvar <span class="copy">✍ copiar</span></h3>
+<ul>
+<li><code>wr</code> em <b>cada</b> roteador e switch (no final do gabarito ele passou equipamento por equipamento dando <code>wr</code>).</li>
+<li><kbd>Ctrl</kbd>+<kbd>S</kbd> no Packet Tracer.</li>
+<li>STP e OSPF demoram para convergir: espere ou use <b>Fast Forward Time</b> antes de concluir que não funciona.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="ping">
+<h2><span class="n">★</span> Matriz de ping entre VLANs (o teste do professor) <span class="copy">✍ copiar</span></h2>
+<p class="lead">Teste na ordem abaixo: o primeiro degrau que falha diz onde está o defeito.</p>
+<div class="tw"><table>
+<tr><th>Degrau</th><th>Ping de… para…</th><th>Se falhar, o problema está em</th></tr>
+<tr><td>1</td><td>Host → <b>seu gateway</b></td><td>IP/máscara do host, porta do switch na VLAN errada, porta do roteador na VLAN errada, falta <code>no shut</code>, trunk/canal no caminho.</td></tr>
+<tr><td>2</td><td>Host → host da <b>mesma VLAN</b> em <b>outro switch</b></td><td>Trunk (VLAN fora do <code>allowed</code>, VLAN inexistente num switch de passagem), EtherChannel.</td></tr>
+<tr><td>3</td><td>Host → host de <b>outra VLAN</b> do <b>mesmo</b> roteador</td><td>Gateway de um dos dois hosts.</td></tr>
+<tr><td>4</td><td>Host → host de <b>outro prédio/área</b></td><td>OSPF: vizinho não FULL, <code>network</code> faltando, área errada, LAN não redistribuída.</td></tr>
+<tr><td>5</td><td>Host → LAN atrás de <b>roteador estático</b></td><td><code>ip route</code>, <code>redistribute static subnets</code>, rota padrão do estático (caminho de volta).</td></tr>
+</table></div>
+<div class="cols">
+<div class="box">
+<h4>Como ler o resultado</h4>
+<ul class="tight">
+<li><code>Reply from …</code> = ok.</li>
+<li>1º ping com 1–2 <code>Request timed out</code> e depois respostas = normal (ARP). Repita.</li>
+<li><code>Request timed out</code> sempre = a ida ou a volta se perdeu.</li>
+<li><code>Destination host unreachable</code> = algum roteador (ou o host) sem rota/gateway.</li>
+</ul>
+</div>
+<div class="box">
+<h4>Por que um ping entre VLANs falha</h4>
+<ol class="tight">
+<li>Host sem gateway ou gateway errado.</li>
+<li>Porta do switch do host na VLAN errada.</li>
+<li>Porta do switch que vai ao roteador na VLAN errada.</li>
+<li>VLAN inexistente num switch que só a transporta.</li>
+<li>Trunk sem a VLAN em <code>allowed vlan</code>.</li>
+<li>Interface do roteador sem <code>no shut</code> ou com IP de outra rede.</li>
+<li>Rede faltando no OSPF.</li>
+<li>Roteador estático sem rota de volta / sem <code>redistribute static subnets</code>.</li>
+</ol>
+</div>
+</div>
+<h3>Matriz (desenhe em branco)</h3>
+<div class="tw"><table>
+<tr><th>de \ para</th><th>VLAN __<br>(IP ______)</th><th>VLAN __<br>(IP ______)</th><th>VLAN __<br>(IP ______)</th><th>VLAN __<br>(IP ______)</th><th>LAN __<br>(IP ______)</th></tr>
+<tr><th>VLAN __</th><td class="x">—</td><td></td><td></td><td></td><td></td></tr>
+<tr><th>VLAN __</th><td></td><td class="x">—</td><td></td><td></td><td></td></tr>
+<tr><th>VLAN __</th><td></td><td></td><td class="x">—</td><td></td><td></td></tr>
+<tr><th>VLAN __</th><td></td><td></td><td></td><td class="x">—</td><td></td></tr>
+<tr><th>LAN __</th><td></td><td></td><td></td><td></td><td class="x">—</td></tr>
+</table></div>
+<p class="muted">Depois de um representante por VLAN, pingue <b>todos</b> os hosts de cada VLAN a partir de um host de outra — pega host sem gateway e porta de switch na VLAN errada.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="diag">
+<h2><span class="n">⚙</span> Diagnóstico: sintoma → causa → correção <span class="copy">✍ copiar</span></h2>
+<div class="tw"><table>
+<tr><th>Sintoma</th><th>Causa provável</th><th>Corrigir</th></tr>
+<tr><td>Link vermelho no roteador</td><td>Falta <code>no shut</code></td><td><code>sh ip int br</code> → <code>administratively down</code> → <code>int …</code> + <code>no shut</code></td></tr>
+<tr><td>Link laranja que não fica verde</td><td>Porta bloqueada pelo STP (normal num anel) ou convergindo</td><td>Esperar / Fast Forward Time; <code>sh spanning-tree</code></td></tr>
+<tr><td>Ping ao gateway falha</td><td>IP/gateway do host; porta access na VLAN errada; porta do roteador em outra VLAN</td><td>IP Configuration do host; <code>sh run</code> no switch</td></tr>
+<tr><td>Mesma VLAN, switches diferentes, não pinga</td><td>Trunk faltando / VLAN fora do allowed / VLAN não existe no switch</td><td><code>sh run</code> nas portas; <code>vlan N</code> se faltar</td></tr>
+<tr><td>Canal não sobe</td><td>Só um lado configurado ou modos diferentes</td><td><code>channel-group 1 mode active</code> nos dois lados</td></tr>
+<tr><td>Root errado</td><td><code>root primary</code> no switch errado, ou dado antes de outro</td><td>Repetir <code>spanning-tree vlan N root primary</code> no switch certo; <code>sh spanning-tree</code></td></tr>
+<tr><td><code>sh ip ospf neighbor</code> vazio num enlace</td><td>Enlace fora do <code>network</code>; áreas diferentes; IPs em /30 diferentes; interface down</td><td><code>sh run</code> nos dois lados; <code>sh ip int br</code></td></tr>
+<tr><td>Vizinho FULL mas falta rota para uma LAN</td><td>LAN não entrou no OSPF</td><td><code>network</code> da LAN ou <code>redistribute connected subnets</code></td></tr>
+<tr><td>Ping para a LAN do roteador estático: timed out</td><td>Sem rota de volta</td><td>Estático: <code>ip route 0.0.0.0 0.0.0.0 …</code>; vizinho: <code>ip route</code> + <code>redistribute static subnets</code></td></tr>
+<tr><td>Ping ao roteador de parceiros falha</td><td>IP digitado na interface errada (Prova B: era a <b>Ser0/1</b>, ele pôs na Ser0/0)</td><td>Mouse sobre o cabo; <code>no ip add</code> na errada; <code>ip add</code> + <code>no shut</code> na certa</td></tr>
+<tr><td>Serial <code>down/down</code> com tudo configurado</td><td>Falta clock no lado DCE <span class="fora">fora do gabarito</span></td><td><code>sh controllers ser0/0</code> diz DCE/DTE; no DCE: <code>int ser0/0</code> → <code>clock rate 2000000</code></td></tr>
+<tr><td>Interface caiu "sozinha" depois de um show</td><td><code>sh run</code> dentro de <code>(config-if)#</code> virou <code>shutdown</code></td><td><code>no shut</code>; use <code>do sh run</code> dentro do config</td></tr>
+<tr><td>CLI "trava" após erro de digitação no <code>#</code></td><td>O IOS tenta resolver a palavra como nome (DNS)</td><td>Esperar ou <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>6</kbd></td></tr>
+<tr><td><code>% Invalid input</code></td><td>Modo errado ou faltou parâmetro</td><td>Olhar o prompt; usar <code>?</code></td></tr>
+<tr><td><code>% … overlaps with …</code></td><td>Duas interfaces do mesmo roteador na mesma rede</td><td>Rever a tabela da F3</td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="provas">
+<h2><span class="n">P</span> Provas práticas de 2025 (A e B), passo a passo <span class="prof">jeito do professor</span></h2>
+<p class="lead">As duas provas de 01/11/2025 (<code>prova_antiga/Prova-A.pkt</code> e <code>Prova-B.pkt</code>) com os gabaritos dele. Os comandos abaixo saíram dos logs dos gabaritos, na ordem em que ele digitou, sem os erros, os <code>?</code> e os pings. É o formato real da prova: <b>mais curto que o Lab 7</b>, com <b>enlace serial</b> e um <b>roteador de parceiros</b> já configurado.</p>
+
+<h3>Enunciado (nota da área de trabalho, igual nas duas)</h3>
+<div class="box">
+<ul class="tight">
+<li>Implemente a rede respeitando as conexões físicas já feitas e as alocações de IP escritas no desenho.</li>
+<li><b>Equipamentos vermelhos não devem ser alterados</b>: já estão configurados e OK.</li>
+<li>O <b>roteador vermelho</b> é a rede de parceiros: <b>não participa do OSPF</b> e já tem rotas estáticas para toda a rede apontando para o roteador vizinho, cujo IP na interface para os parceiros <b>deve ser</b> o indicado (A: <code>172.16.4.2</code> no Router1 · B: <code>10.0.1.26</code> no Router0).</li>
+<li>Equipamentos <b>azuis</b> estão sem configuração: crie tudo o que a topologia pede.</li>
+<li>No desenho: as redes de cada VLAN, o /30 entre os roteadores, a LAN do Router1, "Area 0" e, ao lado do Router0, qual porta é de qual VLAN.</li>
+</ul>
+</div>
+
+<h3>Prova × Lab 7 <span class="copy">✍ copiar</span></h3>
+<div class="cols">
+<div class="box ok">
+<h4>Igual ao Lab 7</h4>
+<ul class="tight">
+<li>Portas access: <code>switchport mode access</code> + <code>switchport access vlan N</code>, VLANs intercaladas nos dois switches. Sem <code>vlan N</code>, sem <code>hostname</code>.</li>
+<li>EtherChannel LACP: <code>int range fa0/1-2</code> → <code>channel-group N mode active</code> → <code>int poN</code> → trunk + <code>allowed vlan</code>.</li>
+<li>Roteador com <b>uma porta física por VLAN</b>.</li>
+<li>OSPF 1, área 0, <code>network … 255.255.255.252 area 0</code> e LANs por <code>redistribute connected subnets</code> (<code>O E2</code>).</li>
+<li>Hosts <code>.2</code>, <code>.3</code>; gateway <code>.1</code>.</li>
+</ul>
+</div>
+<div class="box warn">
+<h4>Diferente do Lab 7</h4>
+<ul class="tight">
+<li><b>Só a área 0</b> e só dois roteadores em OSPF. Nada de <code>O IA</code>.</li>
+<li><b>Sem STP</b>: dois switches com um canal não formam anel; o gabarito não tem <code>root primary</code>.</li>
+<li>Enlace R0–R1 <b>serial</b>: <code>int ser0/0</code>. O <code>clock rate</code> já vem no lado DCE; ele não digitou.</li>
+<li><b>Roteador de parceiros</b> (sem OSPF): no vizinho, IP pedido + <code>ip route «rede dos parceiros»</code> + <code>redistribute static subnets</code>. É o R0/R5 do Lab 6, cenário A.</li>
+<li>O número do Port-channel é <b>local</b>: na A ele usou Po1 no SW0 e Po2 no SW1.</li>
+</ul>
+</div>
+</div>
+<div class="box bad">
+<h4>⚠ Duas armadilhas que ele mesmo caiu ou evitou</h4>
+<ul class="tight">
+<li><b>Prova B:</b> o parceiro está na <b>Serial0/1</b> do Router0, não na 0/0. Ele digitou o IP na Ser0/0, o ping falhou e teve de fazer <code>no ip add</code> e refazer na Ser0/1. <b>Passe o mouse sobre o cabo antes.</b></li>
+<li><b>Qual porta do R0 é de qual VLAN:</b> a nota ao lado do cabo diz. Na A a Fa0/0 é a <b>VLAN 20</b> (SW0 Fa0/3) e a Fa0/1 a VLAN 10; na B a Fa0/0 é a VLAN 100 e a Fa0/1 a 120.</li>
+</ul>
+</div>
+
+<h3>Prova A — topologia e endereçamento</h3>
+<pre class="topo">  PC3-VLAN20 = SW1 Fa0/4           PC4-VLAN20 = SW0 Fa0/6
+  PC1-VLAN10 = SW1 Fa0/3           PC2-VLAN10 = SW0 Fa0/5
+         [SW1] Fa0/1-2 ═══ Po2 │ Po1 ═══ Fa0/1-2 [SW0]     (Po2 = nome do canal no SW1, Po1 = no SW0;
+                                                            o número é local — Po1 nos dois também funciona)
+                                          Fa0/3 ── VLAN 20 ──→ Fa0/0 [R0]
+                                          Fa0/4 ── VLAN 10 ──→ Fa0/1 [R0]
+
+  [R0] Ser0/0 .2 ═══ serial 172.17.2.0/30 ═══ .1 Ser0/0 [R1] Fa0/1 .1 ── SW2 ── PC4 172.17.1.2
+                                                           Fa0/0 .2
+                                                             │  172.16.4.0/30 (crossover)
+                                                           Fa0/0 .1
+                                        [router-partner]  (VERMELHO — não mexer)
+                                                           Fa0/1 .1 ── SW3 ── PC 192.168.1.12
+  router-partner: ip route 172.17.0.0 255.255.0.0 172.16.4.2 · ip route 172.18.0.0 255.255.0.0 172.16.4.2</pre>
+<div class="tw"><table>
+<tr><th>Rede</th><th>Prefixo</th><th>Gateway</th><th>Hosts</th><th>Como entra no OSPF</th></tr>
+<tr><td>VLAN 10</td><td>172.18.1.0/24</td><td>R0 fa0/1 172.18.1.1</td><td>PC1 .2 · PC2 .3</td><td>redistribute connected (R0)</td></tr>
+<tr><td>VLAN 20</td><td>172.18.2.0/24</td><td>R0 fa0/0 172.18.2.1</td><td>PC3 .2 · PC4-VLAN20 .3</td><td>redistribute connected (R0)</td></tr>
+<tr><td>LAN do R1</td><td>172.17.1.0/24</td><td>R1 fa0/1 172.17.1.1</td><td>PC4 .2</td><td>redistribute connected (R1)</td></tr>
+<tr><td>R0–R1 (serial)</td><td>172.17.2.0/30</td><td colspan="2">R1 ser0/0 .1 · R0 ser0/0 .2</td><td><code>network</code> área 0</td></tr>
+<tr><td>R1–parceiro</td><td>172.16.4.0/30</td><td colspan="2">parceiro .1 · R1 fa0/0 <b>.2</b> (imposto)</td><td>redistribute connected (R1)</td></tr>
+<tr><td>Parceiros</td><td>192.168.1.0/24</td><td>parceiro 192.168.1.1</td><td>192.168.1.12</td><td><code>ip route</code> + redistribute static (R1)</td></tr>
+</table></div>
+
+<h3>Prova A — comandos (ordem dele: R1 → R0 → SW0 → SW1)</h3>
+<div class="cols">
+<pre class="cli"><span class="dev">! Router1 (vizinho do parceiro)</span>
+ena
+conf t
+int fa0/1
+ip add 172.17.1.1 255.255.255.0
+no shut
+exit
+exit
+conf t
+int fa0/0
+ip add 172.16.4.2 255.255.255.252
+no shut
+exit
+exit
+conf t
+ip route 192.168.1.0 255.255.255.0 172.16.4.1
+exit
+wr
+conf t
+int ser0/0
+ip add 172.17.2.1 255.255.255.252
+no shut
+exit
+router ospf 1
+redistribute static subnets
+redistribute connected subnets
+network 172.17.2.0 255.255.255.252 area 0
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router0 (VLANs)</span>
+ena
+conf t
+int ser0/0
+ip add 172.17.2.2 255.255.255.252
+no shut
+exit
+router ospf 1
+redistribute connected subnets
+network 172.17.2.0 255.255.255.252 area 0
+int fa0/0
+ip add 172.18.2.1 255.255.255.0
+no shut
+int fa0/1
+ip add 172.18.1.1 255.255.255.0
+no shut
+exit
+exit
+sh ip route
+wr</pre>
+<pre class="cli"><span class="dev">! Switch0</span>
+ena
+conf t
+int fa0/3
+switchport mode access
+switchport access vlan 20
+int fa0/4
+switchport mode access
+switchport access vlan 10
+int fa0/5
+switchport mode access
+switchport access vlan 10
+int fa0/6
+switchport mode access
+switchport access vlan 20
+int range fa0/1-2
+channel-group 1 mode active
+int po1
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Switch1</span>
+ena
+conf t
+int range fa0/1-2
+channel-group 2 mode active
+int po2
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+int fa0/4
+switchport mode access
+switchport access vlan 20
+int fa0/3
+switchport mode access
+switchport access vlan 10
+exit
+exit
+wr</pre>
+</div>
+<p class="muted">Hosts (IP Configuration): PC1-VLAN10 172.18.1.2 · PC2-VLAN10 172.18.1.3 (gw 172.18.1.1) · PC3-VLAN20 172.18.2.2 · PC4-VLAN20 172.18.2.3 (gw 172.18.2.1) · PC4 172.17.1.2 (gw 172.17.1.1). Repare que do <code>(config-router)#</code> ele foi direto para <code>int fa0/0</code>: funciona, o IOS muda de modo sozinho.</p>
+
+<h3>Prova B — topologia e endereçamento</h3>
+<pre class="topo">  PC-10.20.4.22 ── SW3 ── Fa0/0 .1 [router-parceiros] Ser0/0 .25  (VERMELHO — não mexer)
+                                                          ║  serial 10.0.1.24/30
+                                                          ║
+  PC3-VLAN100 = SW1 Fa0/4          PC4-VLAN100 = SW0 Fa0/6 ║
+  PC1-VLAN120 = SW1 Fa0/3          PC2-VLAN120 = SW0 Fa0/5 ║
+         [SW1] Fa0/1-2 ═══ Po1 │ Po1 ═══ Fa0/1-2 [SW0]     ║
+                                          Fa0/3 ── VLAN 100 ──→ Fa0/0 [R0] <b>Ser0/1</b> .26
+                                          Fa0/4 ── VLAN 120 ──→ Fa0/1 [R0]
+
+  [R0] Ser0/0 .1 ═══ serial 192.168.4.0/30 ═══ .2 Ser0/0 [R1] Fa0/1 .1 ── SW2 ── PC4 192.168.3.2
+  router-parceiros: ip route 192.168.0.0 255.255.0.0 10.0.1.26</pre>
+<div class="tw"><table>
+<tr><th>Rede</th><th>Prefixo</th><th>Gateway</th><th>Hosts</th><th>Como entra no OSPF</th></tr>
+<tr><td>VLAN 100</td><td>192.168.1.0/24</td><td>R0 fa0/0 192.168.1.1</td><td>PC3 .2 · PC4-VLAN100 .3</td><td>redistribute connected (R0)</td></tr>
+<tr><td>VLAN 120</td><td>192.168.2.0/24</td><td>R0 fa0/1 192.168.2.1</td><td>PC1 .2 · PC2 .3</td><td>redistribute connected (R0)</td></tr>
+<tr><td>LAN do R1</td><td>192.168.3.0/24</td><td>R1 fa0/1 192.168.3.1</td><td>PC4 .2</td><td>redistribute connected (R1)</td></tr>
+<tr><td>R0–R1 (serial)</td><td>192.168.4.0/30</td><td colspan="2">R0 ser0/0 .1 · R1 ser0/0 .2</td><td><code>network</code> área 0</td></tr>
+<tr><td>R0–parceiro (serial)</td><td>10.0.1.24/30</td><td colspan="2">parceiro .25 · R0 <b>ser0/1</b> .26 (imposto)</td><td>redistribute connected (R0)</td></tr>
+<tr><td>Parceiros</td><td>10.20.4.0/24</td><td>parceiro 10.20.4.1</td><td>10.20.4.22</td><td><code>ip route</code> + redistribute static (R0)</td></tr>
+</table></div>
+
+<h3>Prova B — comandos (ordem dele: SW1 e SW0 → R0 → R1)</h3>
+<div class="cols">
+<pre class="cli"><span class="dev">! Switch1</span>
+ena
+conf t
+int range fa0/1-2
+channel-group 1 mode active
+int po1
+switchport mode trunk
+switchport trunk allowed vlan 100,120
+int fa0/4
+switchport mode access
+switchport access vlan 100
+int fa0/3
+switchport mode access
+switchport access vlan 120
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Switch0</span>
+ena
+conf t
+int range fa0/1-2
+channel-group 1 mode active
+int po1
+switchport mode trunk
+switchport trunk allowed vlan 100,120
+int fa0/6
+switchport mode access
+switchport access vlan 100
+int fa0/5
+switchport mode access
+switchport access vlan 120
+int fa0/3
+switchport mode access
+switchport access vlan 100
+int fa0/4
+switchport mode access
+switchport access vlan 120
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router0 (VLANs + vizinho do parceiro)</span>
+ena
+conf t
+int fa0/0
+ip add 192.168.1.1 255.255.255.0
+no shut
+int fa0/1
+ip add 192.168.2.1 255.255.255.0
+no shut
+int ser0/1
+ip add 10.0.1.26 255.255.255.252
+no shut
+exit
+exit
+ping 10.0.1.25
+conf t
+ip route 10.20.4.0 255.255.255.0 10.0.1.25
+router ospf 1
+redistribute static subnets
+network 192.168.4.0 255.255.255.252 area 0
+redistribute connected subnets
+exit
+exit
+wr
+conf t
+int ser0/0
+ip add 192.168.4.1 255.255.255.252
+no shut
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router1</span>
+ena
+conf t
+int fa0/1
+ip add 192.168.3.1 255.255.255.0
+no shut
+int ser0/0
+ip add 192.168.4.2 255.255.255.252
+no shut
+router ospf 1
+network 192.168.4.0 255.255.255.252 area 0
+redistribute connected subnets
+exit
+exit
+wr
+sh ip route</pre>
+</div>
+<p class="muted">Hosts: PC1-VLAN120 192.168.2.2 · PC2-VLAN120 192.168.2.3 (gw 192.168.2.1) · PC3-VLAN100 192.168.1.2 · PC4-VLAN100 192.168.1.3 (gw 192.168.1.1) · PC4 192.168.3.2 (gw 192.168.3.1). No log ele digitou primeiro <code>network 192.168.4.0 255.255.255.252</code> <b>sem a área</b> (dá erro) e repetiu com <code>area 0</code>.</p>
+
+<h3>Por que tudo responde (ida e volta)</h3>
+<div class="box ok">
+<p style="margin:0 0 6px"><b>VLAN → VLAN:</b> as duas são conectadas no R0; basta o gateway certo nos PCs.</p>
+<p style="margin:0 0 6px"><b>VLAN → LAN do R1:</b> o R0 aprende a LAN do R1 como <code>O E2</code> (redistribute connected no R1) e o R1 aprende as VLANs da mesma forma pelo R0.</p>
+<p style="margin:0"><b>Qualquer rede → parceiros:</b> o vizinho do parceiro tem a <code>ip route</code> e a anuncia com <code>redistribute static subnets</code> (o outro roteador vê <code>O E2</code>). A volta é a estática resumida do parceiro (172.17/16 e 172.18/16 na A; 192.168/16 na B): por isso <b>todos os IPs da rede precisam caber nesses resumos</b>, e por isso o IP do vizinho é imposto.</p>
+</div>
+<h4>Tabela de rotas esperada <span class="tag prev">previsão, não conferida no PT</span></h4>
+<div class="cols">
+<pre class="cli"><span class="dev">! Prova A — R0: sh ip route</span>
+C    172.17.2.0/30 is directly connected, Serial0/0
+O E2 172.17.1.0/24 [110/20] via 172.17.2.1
+O E2 172.16.4.0/30 [110/20] via 172.17.2.1
+O E2 192.168.1.0/24 [110/20] via 172.17.2.1
+C    172.18.1.0/24 is directly connected, Fa0/1
+C    172.18.2.0/24 is directly connected, Fa0/0</pre>
+<pre class="cli"><span class="dev">! Prova B — R1: sh ip route</span>
+C    192.168.4.0/30 is directly connected, Serial0/0
+C    192.168.3.0/24 is directly connected, Fa0/1
+O E2 192.168.1.0/24 [110/20] via 192.168.4.1
+O E2 192.168.2.0/24 [110/20] via 192.168.4.1
+O E2 10.0.1.24/30 [110/20] via 192.168.4.1
+O E2 10.20.4.0/24 [110/20] via 192.168.4.1</pre>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="lab7">
+<h2><span class="n">L7</span> Gabarito do Lab 7, passo a passo <span class="prof">jeito do professor</span></h2>
+<p class="lead">Comandos do log de <code>Exercicio - 2026-11-09-gabarito.pkt</code>, na ordem em que ele digitou, sem os <code>?</code>, os erros de digitação e as tentativas desfeitas.</p>
+
+<h3>Enunciado (notas da área de trabalho)</h3>
+<div class="box">
+<ul class="tight">
+<li>Pede-se: 1) toda a alocação de IPs; 2) EtherChannel, switching, VLANs e STP; 3) todo o roteamento.</li>
+<li>Prédio A (área 1): o Router0 tem uma interface em cada VLAN (10 e 20); o switch onde o roteador se conecta deve ser o <b>root das duas VLANs</b>.</li>
+<li>Prédio B (área 3): cada interface do Router2 numa VLAN (30 e 40). Prédio C: área 2. Triângulo R0–R1–R2: área 0.</li>
+<li>"Não use redistribuição" aparece nas notas — o gabarito usou redistribuição no R2 (veja a caixa no fim desta seção).</li>
+</ul>
+</div>
+
+<h3>Topologia e portas</h3>
+<pre class="topo">PRÉDIO A — área 1 (anel de 4 switches; VLANs 10 e 20 em todos)
+
+   PC1(V10)=Fa0/4  Laptop1(V20)=Fa0/1            PC2(V20)=Fa0/3  Laptop3(V10)=Fa0/1
+                [SW0] Fa0/2 ───────────────── Fa0/2 [SW2]
+                Fa0/3                               Gi0/1   Gi0/2
+                  │                                    ╲   ╱    EtherChannel Po1 (LACP)
+                  │                                    ╱   ╲    cabos cruzados: SW2 Gi0/1 ↔ SW3 Gi0/2
+                Fa0/3                               Gi0/1   Gi0/2
+                [SW1] Fa0/2 ───────────────── Fa0/2 [SW3]  Fa0/3 ── VLAN 10 ──→ R0 Fa0/0
+   Laptop0(V10)=Fa0/1  PC0(V20)=Fa0/4                      Fa0/4 ── VLAN 20 ──→ R0 Fa0/1
+                                              Laptop2(V20)=Fa0/1  PC3(V10)=Fa0/5
+
+ÁREA 0 (triângulo de roteadores, cabos cruzados)
+
+        [R0] Fa1/0 .1 ──── 172.16.1.0/30 ──── .2 Fa0/0 [R1] Fa1/0 ── SW4 ── Laptop6   (PRÉDIO C — área 2)
+       Fa1/1 .9                                   Fa0/1 .5
+          │                                          │
+     172.16.1.8/30                             172.16.1.4/30
+          │                                          │
+        .10 Fa0/1 ────────────── [R2] ────────── Fa0/0 .6
+                          Fa1/0         Fa1/1
+                     SW5 Fa0/3 (V30)  SW5 Fa0/4 (V40)
+              Laptop5 (V30) = SW5 Fa0/1   Laptop4 (V40) = SW5 Fa0/2      (PRÉDIO B — área 3)</pre>
+
+<h3>Endereçamento</h3>
+<div class="tw"><table>
+<tr><th>Rede</th><th>Prefixo</th><th>Gateway</th><th>Hosts (nome · IP)</th><th>OSPF</th></tr>
+<tr><td>VLAN 10</td><td>10.1.1.0/24</td><td>R0 fa0/0 10.1.1.1</td><td>PC1 .2 (SW0) · Laptop3 .3 (SW2) · Laptop0 .4 (SW1) · PC3 .5 (SW3)</td><td>área 1</td></tr>
+<tr><td>VLAN 20</td><td>10.1.2.0/24</td><td>R0 fa0/1 10.1.2.1</td><td>Laptop1 .2 (SW0) · PC2 .3 (SW2) · PC0 .4 (SW1) · Laptop2 .5 (SW3)</td><td>área 1</td></tr>
+<tr><td>Prédio C</td><td>10.4.0.0/24</td><td>R1 f1/0 10.4.0.1</td><td>Laptop6 .2</td><td>área 2</td></tr>
+<tr><td>VLAN 30</td><td>10.2.3.0/24</td><td>R2 f1/0 10.2.3.1</td><td>Laptop5 .2</td><td>redistribute</td></tr>
+<tr><td>VLAN 40</td><td>10.2.4.0/24</td><td>R2 fa1/1 10.2.4.1</td><td>Laptop4 .2</td><td>redistribute</td></tr>
+<tr><td>R0–R1</td><td>172.16.1.0/30</td><td colspan="2">R0 f1/0 .1 · R1 fa0/0 .2</td><td>área 0</td></tr>
+<tr><td>R1–R2</td><td>172.16.1.4/30</td><td colspan="2">R1 fa0/1 .5 · R2 fa0/0 .6</td><td>área 0</td></tr>
+<tr><td>R2–R0</td><td>172.16.1.8/30</td><td colspan="2">R2 fa0/1 .10 · R0 fa1/1 .9</td><td>área 0</td></tr>
+</table></div>
+
+<h3>Passo 1 — R0, interfaces de LAN</h3>
+<pre class="cli"><span class="dev">! Router0</span>
+ena
+conf t
+hostname router0
+int fa0/0
+ip add 10.1.1.1 255.255.255.0
+no shut
+int fa0/1
+ip add 10.1.2.1 255.255.255.0
+no shut
+exit
+exit</pre>
+
+<h3>Passo 2 — switches do prédio A</h3>
+<div class="cols">
+<div>
+<pre class="cli"><span class="dev">! Switch0</span>
+ena
+conf t
+int fa0/4
+switchport access vlan 10
+int fa0/1
+switchport access vlan 20
+int range fa0/2-3
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Switch1</span>
+ena
+conf t
+int range fa0/2-3
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+exit
+int fa0/1
+switchport mode access
+switchport access vlan 10
+int fa0/4
+switchport access vlan 20
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Switch2</span>
+ena
+conf t
+int fa0/1
+switchport access vlan 10
+int fa0/3
+switchport access vlan 20
+int range g0/1-2
+channel-group 1 mode active
+int po1
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+int fa0/2
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+exit
+exit
+wr</pre>
+</div>
+<div>
+<pre class="cli"><span class="dev">! Switch3 (liga no R0 → root)</span>
+ena
+conf t
+int range g0/1-2
+channel-group 1 mode active
+int po1
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+int fa0/2
+switchport mode trunk
+switchport trunk allowed vlan 10,20
+int fa0/5
+switchport mode access
+switchport access vlan 10
+int fa0/1
+switchport mode access
+switchport access vlan 20
+int fa0/3                  <span class="c">! → R0 fa0/0</span>
+switchport mode access
+switchport access vlan 10
+int fa0/4                  <span class="c">! → R0 fa0/1</span>
+switchport mode access
+switchport access vlan 20
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Switch3 — STP</span>
+sh spanning-tree
+conf t
+spanning-tree vlan 10 root primary
+spanning-tree vlan 20 root primary
+spanning-tree vlan 1 root primary
+exit
+sh spanning-tree
+wr</pre>
+</div>
+</div>
+<div class="box info"><p style="margin:0"><b>O que mais aparece no log do STP:</b> um <code>spanning-tree vlan 10 root primary</code> também no SW0 (que deixou o SW0 com 20480 na VLAN 10), o <code>root primary</code> repetido no SW3 e o <code>spanning-tree vlan 10 priority 12288</code> (resposta à pergunta de um aluno). Na prova: <code>root primary</code> só no switch pedido; confira com <code>sh spanning-tree</code>. Porta bloqueada prevista: SW0 Fa0/3 <span class="tag prev">previsão</span>.</p></div>
+
+<h3>Passo 3 — SW5 (prédio B)</h3>
+<pre class="cli"><span class="dev">! Switch5</span>             <span class="c">(o SW4 do prédio C fica sem configuração)</span>
+ena
+conf t
+int fa0/1                  <span class="c">! Laptop5</span>
+switchport mode access
+switchport access vlan 30
+int fa0/3                  <span class="c">! → R2 f1/0</span>
+switchport mode access
+switchport access vlan 30
+int fa0/2                  <span class="c">! Laptop4</span>
+switchport mode access
+switchport access vlan 40
+int fa0/4                  <span class="c">! → R2 fa1/1</span>
+switchport mode access
+switchport access vlan 40
+exit
+exit
+wr</pre>
+
+<h3>Passo 4 — interfaces dos roteadores</h3>
+<div class="cols">
+<pre class="cli"><span class="dev">! Router2 — LANs</span>
+ena
+conf t
+int fa1/0
+ip add 10.2.3.1 255.255.255.0
+no shut
+int fa1/1
+ip add 10.2.4.1 255.255.255.0
+no shut
+exit
+exit
+wr
+ping 10.2.3.2
+ping 10.2.4.2</pre>
+<pre class="cli"><span class="dev">! Router1</span>
+ena
+conf t
+int fa1/0
+ip add 10.4.0.1 255.255.255.0
+no shut
+int fa0/0
+ip add 172.16.1.2 255.255.255.252
+no shut
+int fa0/1
+ip add 172.16.1.5 255.255.255.252
+no shut
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router0 — enlaces</span>
+ena
+conf t
+int f1/0
+ip address 172.16.1.1 255.255.255.252
+no shut
+int fa1/1
+ip add 172.16.1.9 255.255.255.252
+no shut</pre>
+<pre class="cli"><span class="dev">! Router2 — enlaces</span>
+conf t
+int fa0/0
+ip add 172.16.1.6 255.255.255.252
+no shut
+int fa0/1
+ip add 172.16.1.10 255.255.255.252
+no shut
+exit
+exit</pre>
+</div>
+
+<h3>Passo 5 — OSPF</h3>
+<div class="cols">
+<pre class="cli"><span class="dev">! Router0 (ABR 0/1)</span>
+exit
+router ospf 1
+network 10.1.1.0 255.255.255.0 area 1
+network 10.1.2.0 255.255.255.0 area 1
+network 172.16.1.0 255.255.255.252 area 0
+network 172.16.1.8 255.255.255.252 area 0
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router1 (ABR 0/2)</span>
+conf t
+router ospf 1
+network 10.4.0.0 255.255.255.0 area 2
+network 172.16.1.4 255.255.255.252 area 0
+network 172.16.1.0 255.255.255.252 area 0
+exit
+exit
+wr
+sh ip route</pre>
+<pre class="cli"><span class="dev">! Router2</span>
+conf t
+router ospf 1
+network 172.16.1.4 255.255.255.252 area 0
+network 172.16.1.8 255.255.255.252 area 0
+redistribute connected subnets
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Conferência (como ele fez)</span>
+R1#  sh ip route
+R0#  sh ip route
+R0#  sh ip int br
+R0#  ping 10.1.1.2
+<span class="c">! e por fim wr em todos os equipamentos</span></pre>
+</div>
+
+<div class="box warn">
+<h4>Se o professor cobrar o texto da nota (área 3, sem redistribuição)</h4>
+<p>No R2, troque <code>redistribute connected subnets</code> por:</p>
+<pre class="cli">network 10.2.3.0 255.255.255.0 area 3
+network 10.2.4.0 255.255.255.0 area 3</pre>
+<p style="margin:0">O R2 vira ABR (áreas 0 e 3) e as VLANs 30/40 aparecem como <code>O IA [110/2]</code> em vez de <code>O E2 [110/20]</code>. O ping funciona igual.</p>
+</div>
+
+<h3>Hosts (IP Configuration)</h3>
+<div class="tw"><table>
+<tr><th>Host</th><th>IP</th><th>Máscara</th><th>Gateway</th><th></th><th>Host</th><th>IP</th><th>Máscara</th><th>Gateway</th></tr>
+<tr><td>PC1</td><td>10.1.1.2</td><td>255.255.255.0</td><td>10.1.1.1</td><td></td><td>Laptop1</td><td>10.1.2.2</td><td>255.255.255.0</td><td>10.1.2.1</td></tr>
+<tr><td>Laptop3</td><td>10.1.1.3</td><td>255.255.255.0</td><td>10.1.1.1</td><td></td><td>PC2</td><td>10.1.2.3</td><td>255.255.255.0</td><td>10.1.2.1</td></tr>
+<tr><td>Laptop0</td><td>10.1.1.4</td><td>255.255.255.0</td><td>10.1.1.1</td><td></td><td>PC0</td><td>10.1.2.4</td><td>255.255.255.0</td><td>10.1.2.1</td></tr>
+<tr><td>PC3</td><td>10.1.1.5</td><td>255.255.255.0</td><td>10.1.1.1</td><td></td><td>Laptop2</td><td>10.1.2.5</td><td>255.255.255.0</td><td>10.1.2.1</td></tr>
+<tr><td>Laptop6</td><td>10.4.0.2</td><td>255.255.255.0</td><td>10.4.0.1</td><td></td><td>Laptop5</td><td>10.2.3.2</td><td>255.255.255.0</td><td>10.2.3.1</td></tr>
+<tr><td></td><td></td><td></td><td></td><td></td><td>Laptop4</td><td>10.2.4.2</td><td>255.255.255.0</td><td>10.2.4.1</td></tr>
+</table></div>
+
+<h3>Resultado esperado</h3>
+<pre class="cli"><span class="dev">R1#</span> sh ip route        <span class="c">(gabarito, com redistribute no R2; previsão)</span>
+O IA  10.1.1.0/24 [110/2] via 172.16.1.1, FastEthernet0/0
+O IA  10.1.2.0/24 [110/2] via 172.16.1.1, FastEthernet0/0
+O E2  10.2.3.0/24 [110/20] via 172.16.1.6, FastEthernet0/1
+O E2  10.2.4.0/24 [110/20] via 172.16.1.6, FastEthernet0/1
+C     10.4.0.0/24 is directly connected, FastEthernet1/0
+C     172.16.1.0/30 is directly connected, FastEthernet0/0
+C     172.16.1.4/30 is directly connected, FastEthernet0/1
+O     172.16.1.8/30 [110/2] via 172.16.1.1, FastEthernet0/0
+                    [110/2] via 172.16.1.6, FastEthernet0/1</pre>
+<div class="tw"><table>
+<tr><th>de \ para</th><th>VLAN 10<br>10.1.1.4</th><th>VLAN 20<br>10.1.2.5</th><th>Prédio C<br>10.4.0.2</th><th>VLAN 30<br>10.2.3.2</th><th>VLAN 40<br>10.2.4.2</th></tr>
+<tr><th>VLAN 10 (PC1 10.1.1.2)</th><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td></tr>
+<tr><th>VLAN 20 (Laptop1 10.1.2.2)</th><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td></tr>
+<tr><th>Prédio C (Laptop6)</th><td class="y">✔</td><td class="y">✔</td><td class="x">—</td><td class="y">✔</td><td class="y">✔</td></tr>
+<tr><th>VLAN 30 (Laptop5)</th><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="x">—</td><td class="y">✔</td></tr>
+<tr><th>VLAN 40 (Laptop4)</th><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="x">—</td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="lab6">
+<h2><span class="n">L6</span> Gabarito do Lab 6, passo a passo <span class="prof">jeito do professor</span></h2>
+<p class="lead">Comandos do log de <code>OSPF-2026-10-19-gabarito.pkt</code> (aulas de 21/10 e 26/10/2026). Sem VLANs: cada LAN é um switch sem configuração. Nas LANs ele usou <code>redistribute connected subnets</code>.</p>
+
+<h3>Exercício 1 — triângulo, tudo área 0</h3>
+<pre class="topo">   PC4 10.0.1.2 ── SW7 ── Fa0/0 [ROTEADOR1] Fa0/1 .5 ──── 172.16.10.4/30 ──── .6 Fa0/0 [ROTEADOR2] Fa1/0 ── SW9 ── PC5 10.0.2.2
+                                Fa1/0 .9                                         Fa0/1 .1
+                                   │ 172.16.10.8/30                                 │ 172.16.10.0/30
+                                Fa1/0 .10 ─────────── [ROTEADOR3] ─────────── .2 Fa0/0
+                                                      Fa0/1 ── SW8 ── Laptop0 10.0.3.2</pre>
+<div class="cols">
+<pre class="cli"><span class="dev">! Router11 → ROTEADOR1</span>
+ena
+conf t
+hostname ROTEADOR1
+int fa0/0
+ip address 10.0.1.1 255.255.255.0
+no shut
+int fa0/1
+ip address 172.16.10.5 255.255.255.252
+no shut
+int fa1/0
+ip address 172.16.10.9 255.255.255.252
+no shut
+exit
+exit
+wr
+conf t
+router ospf 1
+network 172.16.10.4 255.255.255.252 area 0
+redistribute connected subnets
+network 172.16.10.8 0.0.0.3 area 0   <span class="c">! aqui ele usou wildcard</span>
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router13 → ROTEADOR2</span>
+ena
+conf t
+hostname ROTEADOR2
+int fa0/0
+ip add 172.16.10.6 255.255.255.252
+no shut
+int fa0/1
+ip add 172.16.10.1 255.255.255.252
+no shut
+int fa1/0
+ip add 10.0.2.1 255.255.255.0
+no shut
+exit
+router ospf 1
+redistribute connected subnets
+network 172.16.10.0 255.255.255.252 area 0
+network 172.16.10.4 255.255.255.252 area 0
+exit
+exit
+wr</pre>
+</div>
+<pre class="cli"><span class="dev">! Router12 → ROTEADOR3</span>
+ena
+conf t
+hostname ROTEADOR3
+int fa1/0
+ip add 172.16.10.10 255.255.255.252
+no shut
+int fa0/0
+ip add 172.16.10.2 255.255.255.252
+no shut
+int fa0/1
+ip add 10.0.3.1 255.255.255.0
+no shut
+exit
+exit
+wr
+conf t
+router ospf 1
+network 172.16.10.0 255.255.255.252 area 0
+network 172.16.10.8 255.255.255.252 area 0
+redistribute connected subnets
+exit
+exit
+wr
+<span class="c">! hosts: PC4 10.0.1.2 gw 10.0.1.1 · PC5 10.0.2.2 gw 10.0.2.1 · Laptop0 10.0.3.2 gw 10.0.3.1 (máscara 255.255.255.0)</span></pre>
+<p class="muted">No ROTEADOR3 ele chegou a pôr <code>network 10.0.3.0 255.255.255.0 area 0</code>, tirou com <code>no network …</code> e trocou por <code>redistribute connected subnets</code> — mostrando na tabela a diferença entre <code>O</code> e <code>O E2</code>.</p>
+
+<h3>Exercício 2 — anel na área 0, área 1 e dois roteadores estáticos</h3>
+<pre class="topo">  PC 10.0.1.2 ─SW5─ Fa0/0 [Router9 "R1"] Fa0/1 .2 ── 10.0.2.0/24 (SW3, PC 10.0.2.3) ── .1 Fa1/0 [R1]   ← estático | ASBR
+                     (estático, sem OSPF)                                             Fa0/0 .2   Fa0/1 .10
+                                                                       192.168.1.0/30  │           │ 192.168.1.8/30
+                                                                                Fa0/0 .1          .9 Fa0/0
+                                                                                   [R5]            [R6]
+                                                                                Fa0/1 .6          .14 Fa0/1
+                                                                       192.168.1.4/30  │           │ 192.168.1.12/30
+                                                                                 Fa0/0 .5   .13 Fa0/1
+                                                                                       [R4]  ← ABR (áreas 0 e 1)
+                                                                                     Fa1/0 .17
+                                                                       área 1  192.168.1.16/30
+                                                                                     Fa0/0 .18
+  PC 10.0.4.2 ─SW6─ Fa0/1 [R2] Fa0/0 .2 ── 10.0.3.0/24 (SW4, PC 10.0.3.3) ── .1 Fa0/1 [R3]   ← área 1 | ASBR
+                     (estático, sem OSPF)</pre>
+<p>Ordem em que ele fez: os dois estáticos (Router9, R2) → R3 → R4 → R5 → R6 → R1.</p>
+<div class="cols">
+<pre class="cli"><span class="dev">! Router9 → hostname R1 (estático)</span>
+ena
+conf t
+hostname R1
+int fa0/0
+ip add 10.0.1.1 255.255.255.0
+no shut
+int fa0/1
+ip add 10.0.2.2 255.255.255.0
+no shut
+ip route 0.0.0.0 0.0.0.0 10.0.2.1
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router10 → hostname R2 (estático)</span>
+ena
+conf t
+hostname R2
+int fa0/0
+ip add 10.0.3.2 255.255.255.0
+no shut
+int fa0/1
+ip add 10.0.4.1 255.255.255.0
+no shut
+ip route 10.0.0.0 255.0.0.0 10.0.3.1
+ip route 192.168.1.0 255.255.255.0 10.0.3.1
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! R3 (área 1, ASBR)</span>
+ena
+conf t
+hostname R3
+int fa0/1
+ip add 10.0.3.1 255.255.255.0
+no shut
+int fa0/0
+ip add 192.168.1.18 255.255.255.252
+no shut
+router ospf 1
+network 192.168.1.16 255.255.255.252 area 1
+redistribute connected subnets
+exit
+exit
+wr
+conf t
+ip route 10.0.4.0 255.255.255.0 10.0.3.2
+router ospf 1
+redistribute static subnets
+exit
+exit</pre>
+<pre class="cli"><span class="dev">! R4 (ABR áreas 0 e 1)</span>
+ena
+conf t
+hostname R4
+int f1/0
+ip add 192.168.1.17 255.255.255.252
+no shut
+exit
+router ospf 1
+network 192.168.1.16 255.255.255.252 area 1
+exit
+int f0/0
+ip add 192.168.1.5 255.255.255.252
+no shut
+int fa0/1
+ip add 192.168.1.13 255.255.255.252
+no shut
+router ospf 1
+network 192.168.1.4 255.255.255.252 area 0
+network 192.168.1.12 255.255.255.252 area 0
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! Router2 → hostname R5</span>
+ena
+conf t
+hostname R5
+int f0/0
+ip add 192.168.1.1 255.255.255.252
+no shut
+int fa0/1
+ip add 192.168.1.6 255.255.255.252
+no shut
+router ospf 1
+network 192.168.1.4 255.255.255.252 area 0
+network 192.168.1.0 255.255.255.252 area 0
+exit
+exit
+wr</pre>
+<pre class="cli"><span class="dev">! R6</span>
+ena
+conf t
+hostname R6
+int f0/0
+ip add 192.168.1.9 255.255.255.252
+no shut
+int f0/1
+ip add 192.168.1.14 255.255.255.252
+no shut
+exit
+router ospf 1
+network 192.168.1.8 255.255.255.252 area 0
+network 192.168.1.12 255.255.255.252 area 0
+exit
+exit
+wr</pre>
+</div>
+<pre class="cli"><span class="dev">! R1 (anel, ASBR)</span>
+ena
+conf t
+hostname R1
+int fa1/0
+ip add 10.0.2.1 255.255.255.0
+no shut
+int fa0/0
+ip add 192.168.1.2 255.255.255.252
+no shut
+int fa0/1
+ip add 192.168.1.10 255.255.255.252
+no shut
+exit
+router ospf 1
+network 192.168.1.0 255.255.255.252 area 0
+network 192.168.1.8 255.255.255.252 area 0
+redistribute connected subnets
+exit
+ip route 10.0.1.0 255.255.255.0 10.0.2.2
+router ospf 1
+redistribute static subnets
+exit
+exit
+<span class="c">! hosts: 10.0.1.2 gw 10.0.1.1 · 10.0.2.3 gw 10.0.2.1 · 10.0.3.3 gw 10.0.3.1 · 10.0.4.2 gw 10.0.4.1</span></pre>
+<div class="box ok">
+<h4>Por que 10.0.1.2 → 10.0.4.2 funciona (ida e volta)</h4>
+<p style="margin:0"><b>Ida:</b> PC → Router9 (default) → R1 → anel (OSPF) → R4 → R3 (<code>O E2</code> 10.0.4.0 redistribuída pelo R3) → R2 (estática do R3) → PC. <b>Volta:</b> R2 (estática 10.0.0.0/8) → R3 → R4 → anel → R1 (estática para 10.0.1.0) → Router9 → PC.</p>
+</div>
+<div class="tw"><table>
+<tr><th>de \ para</th><th>10.0.1.2</th><th>10.0.2.3</th><th>10.0.3.3</th><th>10.0.4.2</th></tr>
+<tr><th>10.0.1.2 (atrás do Router9)</th><td class="x">—</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td></tr>
+<tr><th>10.0.2.3 (LAN R1–Router9)</th><td class="y">✔</td><td class="x">—</td><td class="y">✔</td><td class="y">✔</td></tr>
+<tr><th>10.0.3.3 (LAN R3–R2)</th><td class="y">✔</td><td class="y">✔</td><td class="x">—</td><td class="y">✔</td></tr>
+<tr><th>10.0.4.2 (atrás do R2)</th><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="x">—</td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="fora">
+<h2><span class="n">⚑</span> O que NÃO está nos gabaritos</h2>
+<p class="lead">Tudo o que aparece no guia e não está nos logs dele. Use só se a situação pedir.</p>
+<div class="tw"><table>
+<tr><th>Item</th><th>Quando usar</th></tr>
+<tr><td><code>vlan 10</code> / <code>vlan 20</code> no <code>(config)#</code></td><td>Switch que só transporta a VLAN pelo trunk (sem porta access nela). Está nos slides do Lab 1.</td></tr>
+<tr><td><code>ipconfig IP máscara gateway</code> no Command Prompt</td><td>Se ele exigir CLI também nos hosts (ele usou IP Configuration).</td></tr>
+<tr><td><code>sh vlan brief</code>, <code>sh interfaces trunk</code>, <code>sh etherchannel summary</code>, <code>sh cdp neighbors</code>, <code>tracert</code></td><td>Diagnóstico; só leitura.</td></tr>
+<tr><td><code>network … area 3</code> no R2 do Lab 7</td><td>Se ele cobrar o texto da nota ("não use redistribuição").</td></tr>
+<tr><td>VLSM a partir de um bloco único</td><td>Se o enunciado der um bloco só para dividir.</td></tr>
+<tr><td>Router-on-a-stick: <code>int fa0/0.10</code> + <code>encapsulation dot1Q 10</code> + <code>ip add …</code>; porta do switch em trunk</td><td>Se houver um cabo só do roteador ao switch levando várias VLANs (nos labs era uma porta por VLAN).</td></tr>
+</table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="resumo">
+<h2><span class="n">✍</span> Folha-resumo (copiar primeiro) <span class="copy">✍ copiar</span></h2>
+<div class="box">
+<h4>Regras</h4>
+<p style="margin:0">Roteador e switch só pela aba <b>CLI</b>. Hosts: IP Configuration (como ele fez) ou <code>ipconfig</code> no Command Prompt (se exigir). Teste: ping entre VLANs, tudo responde. Fim: <code>wr</code> em todos + Ctrl+S.</p>
+</div>
+<div class="cols">
+<div class="box">
+<h4>Papel</h4>
+<ol class="tight">
+<li>Ler as <b>notas</b> (áreas, "root", "estático", "redistribuição").</li>
+<li>Portas de cada cabo (mouse sobre o cabo).</li>
+<li>Contar redes: 1 por interface de roteador, 1 por VLAN, /30 por R–R.</li>
+<li>LAN /24 gw .1, hosts .2+; R–R /30 (.1/.2, .5/.6, .9/.10…).</li>
+<li>Cada rede: área do <code>network</code> ou redistribute; estáticos: default + ip route + redistribute static.</li>
+<li>Switches: access/trunk/canal; root primary no switch pedido.</li>
+<li>Roteador vermelho (parceiro): não tocar. No vizinho: IP imposto (interface certa!) + ip route + redistribute static.</li>
+</ol>
+</div>
+<div class="box">
+<h4>Tabelas</h4>
+<p style="margin:0">/24 255.255.255.0 · /25 .128 · /26 .192 · /27 .224 · /28 .240 · /29 .248 · /30 .252<br>/30: .0 .4 .8 .12 .16 .20 … (hosts +1 e +2)<br>Rotas: C conectada · S estática · O mesma área · O IA outra área · O E2 redistribuída [110/20]<br>STP: menor prioridade, depois menor MAC; root primary = 24576 (ou abaixo do root atual).</p>
+</div>
+</div>
+<pre class="cli"><span class="dev">! ===== SWITCH</span>
+ena / conf t
+int fa0/1 / switchport mode access / switchport access vlan 10
+int range fa0/2-3 / switchport mode trunk / switchport trunk allowed vlan 10,20
+int range g0/1-2 / channel-group 1 mode active            <span class="c">! nos dois switches</span>
+int po1 / switchport mode trunk / switchport trunk allowed vlan 10,20
+spanning-tree vlan 10 root primary / spanning-tree vlan 20 root primary   <span class="c">! só no root</span>
+exit / exit / wr
+
+<span class="dev">! ===== ROTEADOR</span>
+ena / conf t / hostname R0
+int fa0/0 / ip add 10.1.1.1 255.255.255.0 / no shut
+int f1/0 / ip add 172.16.1.1 255.255.255.252 / no shut
+int ser0/0 / ip add 172.17.2.2 255.255.255.252 / no shut  <span class="c">! serial: igual (provas 2025)</span>
+exit
+router ospf 1
+network 10.1.1.0 255.255.255.0 area 1                     <span class="c">! 1 por interface, com a área dela</span>
+network 172.16.1.0 255.255.255.252 area 0
+redistribute connected subnets                            <span class="c">! LANs redistribuídas (Lab 6, R2 do Lab 7)</span>
+redistribute static subnets                               <span class="c">! no vizinho de um roteador estático</span>
+exit
+ip route 10.0.1.0 255.255.255.0 10.0.2.2                  <span class="c">! no vizinho OSPF do estático / do parceiro</span>
+ip route 0.0.0.0 0.0.0.0 10.0.2.1                         <span class="c">! no roteador estático</span>
+exit / wr
+
+<span class="dev">! ===== VERIFICAR</span>
+sh spanning-tree · sh run · sh ip int br · sh ip ospf neighbor (FULL) · sh ip route · sh ip route «IP» · ping
+dentro do conf t: do sh run   (nunca "sh run" no config-if)
+Ping: gateway → mesma VLAN outro switch → outra VLAN → outro prédio → atrás do estático</pre>
+<div class="box warn">
+<h4>Se o ping falhar</h4>
+<p style="margin:0">gateway do host · VLAN da porta do host e da porta do roteador · VLAN existe em todos os switches · trunk allowed · <code>no shut</code> · <code>network</code>/área de cada interface · LAN no OSPF (network ou redistribute) · rota de volta (default no estático + <code>redistribute static subnets</code>) · esperar convergir.</p>
+</div>
+</section>
+
+<footer>Guia montado em 14/11/2026 a partir dos logs dos gabaritos dos Labs 6 e 7 (<code>Pratica/lab6_ospf</code>, <code>Pratica/lab7</code>); seção das provas de 2025 acrescentada em 15/11/2026 (<code>Pratica/prova_antiga</code>). Tabelas de rotas e porta bloqueada marcadas como previsão não foram conferidas no Packet Tracer.</footer>
+</main>
+</div>
+<script>
+(function(){
+  var KEY='guia-p1-pratica-copiado';
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){saved={};}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(saved));}catch(e){}}
+  var links={};
+  document.querySelectorAll('nav.toc a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+  document.querySelectorAll('main section').forEach(function(sec){
+    var h=sec.querySelector('h2'); if(!h) return;
+    var lab=document.createElement('label'); lab.className='chk';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!saved[sec.id];
+    lab.appendChild(cb); lab.appendChild(document.createTextNode('copiado'));
+    h.appendChild(lab);
+    function mark(){ if(links[sec.id]) links[sec.id].classList.toggle('done',cb.checked); }
+    cb.addEventListener('change',function(){saved[sec.id]=cb.checked;save();mark();});
+    mark();
+  });
+  var toc=document.getElementById('toc');
+  document.getElementById('burger').addEventListener('click',function(){toc.classList.toggle('open');});
+  toc.addEventListener('click',function(e){if(e.target.closest('a'))toc.classList.remove('open');});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(en){
+      if(en.isIntersecting){Object.keys(links).forEach(function(k){links[k].classList.toggle('on',k===en.target.id);});}
+    });},{rootMargin:'-20% 0px -70% 0px'});
+    document.querySelectorAll('main section').forEach(function(s){io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>
