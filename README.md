@@ -15,8 +15,10 @@ Estudo_com_IA/
 ├── Arquitetura_de_Sistemas/
 │   ├── P1/
 │   │   └── arquitetura_notebook.html
-│   └── P2/
-│       └── arquitetura_notebook_p2.html
+│   ├── P2/
+│   │   └── arquitetura_notebook_p2.html
+│   └── P3/
+│       └── arquitetura_notebook_p3.html
 ├── Automatos/
 │   ├── P1/
 │   │   └── automatos_notebook.html

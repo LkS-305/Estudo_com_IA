@@ -1,5 +1,6 @@
 # Material bruto das matérias (usado pela skill /study-notebook)
 Conteudo/
+*.pdf
 
 # Pastas de build da skill (scripts, partes e testes que geram o HTML)
 _build/
